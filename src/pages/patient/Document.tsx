@@ -78,6 +78,8 @@ export default function DocumentUpload() {
   const convexDocs = useQuery(api.documents.getDocumentsByPatient, patientId ? { patientId: patientId as any } : "skip");
   const createDocument = useMutation(api.documents.createDocument);
   const updateDocument = useMutation(api.documents.updateDocument);
+  const deleteDocument = useMutation(api.documents.deleteDocument);
+  const createTimelineEvent = useMutation(api.timelineEvents.createTimelineEvent);
  
   // Hydrate from Convex on mount (overwrites Zustand to ensure consistency)
   useEffect(() => {
@@ -274,38 +276,61 @@ export default function DocumentUpload() {
       setOcrText(result.text);
       setProcessedDocument(docRecord);
  
-      // Persist to Convex
-      try {
-        const convexDocId = await createDocument({
-          patientId: patientId as any,
-          consultationId: consultationId ? (consultationId as any) : undefined,
-          filename: selectedFile.name,
-          fileType: selectedFile.type || "application/octet-stream",
-          documentType: docRecord.documentType,
-          uploadTimestamp: Date.now(),
-          processingStatus: docRecord.status === "failed" ? "failed" : "completed",
-          extractedData: docRecord.extractedData,
-          confidence: docRecord.confidence,
-          rawText: docRecord.rawText,
-          documentFacts: docRecord.documentFacts,
-          verificationStatus: docRecord.verificationStatus,
-          warnings: docRecord.warnings,
-          reviewRequired: docRecord.reviewRequired,
-          classificationConfidence: docRecord.classificationConfidence,
-          classificationConfidenceLevel: docRecord.classificationConfidenceLevel,
-          error: docRecord.error,
-        });
-        // Update local doc with Convex ID
-        const docWithId = { ...docRecord, id: convexDocId };
-        setProcessedDocument(docWithId);
-        docRecord.id = convexDocId;
-      } catch (err) {
-        console.error("Failed to save document to Convex:", err);
-        setError("Document processed but failed to save. Please try again.");
-        // Still keep local doc but mark error
-        docRecord.error = "Failed to persist to backend";
-        setProcessedDocument(docRecord);
-      }
+        // Persist to Convex
+        try {
+          const convexDocId = await createDocument({
+            patientId: patientId as any,
+            consultationId: consultationId ? (consultationId as any) : undefined,
+            filename: selectedFile.name,
+            fileType: selectedFile.type || "application/octet-stream",
+            documentType: docRecord.documentType,
+            uploadTimestamp: Date.now(),
+            processingStatus: docRecord.status === "failed" ? "failed" : "completed",
+            extractedData: docRecord.extractedData,
+            confidence: docRecord.confidence,
+            rawText: docRecord.rawText,
+            documentFacts: docRecord.documentFacts,
+            verificationStatus: docRecord.verificationStatus,
+            warnings: docRecord.warnings,
+            reviewRequired: docRecord.reviewRequired,
+            classificationConfidence: docRecord.classificationConfidence,
+            classificationConfidenceLevel: docRecord.classificationConfidenceLevel,
+            error: docRecord.error,
+          });
+          // Update local doc with Convex ID
+          const docWithId = { ...docRecord, id: convexDocId };
+          setProcessedDocument(docWithId);
+          docRecord.id = convexDocId;
+
+          // Create timeline event if date is present
+          if (docRecord.extractedData.date && docRecord.extractedData.date !== "Date unavailable" && docRecord.extractedData.date !== "Not detected") {
+            try {
+              await createTimelineEvent({
+                patientId: patientId as any,
+                consultationId: consultationId ? (consultationId as any) : undefined,
+                documentId: convexDocId,
+                eventDate: docRecord.extractedData.date,
+                eventDateSource: "document_metadata",
+                confidence: docRecord.confidence?.date || 0.5,
+                eventType: docRecord.documentType === "prescription" ? "medication" :
+                           docRecord.documentType === "laboratory-report" ? "lab" :
+                           "observation",
+                title: docRecord.documentType || "Document",
+                description: `Extracted from ${selectedFile.name}`,
+                source: "DOCUMENT",
+              });
+            } catch (timelineErr) {
+              console.error("Failed to create timeline event:", timelineErr);
+              // Non-critical, don't block document save
+            }
+          }
+        } catch (err) {
+          console.error("Failed to save document to Convex:", err);
+          setError("Document processed but failed to save. Please try again.");
+          // Still keep local doc but mark error
+          docRecord.error = "Failed to persist to backend";
+          setProcessedDocument(docRecord);
+        }
  
       const existingRefs = new Set(clinicalState.documentReferences ?? []);
       const existingFacts = [...(clinicalState.documentFacts ?? [])];
@@ -358,7 +383,17 @@ export default function DocumentUpload() {
     setError(null);
   };
 
-  const removeDocument = (docId: string) => {
+  const removeDocument = async (docId: string) => {
+    // If it's a Convex document ID (not local), delete from Convex first
+    if (docId && !docId.startsWith("doc-")) {
+      try {
+        await deleteDocument({ documentId: docId as any });
+      } catch (err) {
+        console.error("Failed to delete document from Convex:", err);
+        setError("Failed to delete document. Please try again.");
+        return;
+      }
+    }
     const currentDocs = usePatientStore.getState().documents ?? [];
     const nextDocs = currentDocs.filter((doc) => doc.id !== docId);
     usePatientStore.setState({ documents: nextDocs });

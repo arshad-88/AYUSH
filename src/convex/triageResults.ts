@@ -32,6 +32,14 @@ export const createTriage = mutation({
     if (!user) throw new Error("Not authenticated");
     const patient = await ctx.db.get(args.patientId);
     if (!patient || patient.userId !== user._id) throw new Error("Not authorized");
+    // Check if a triage result already exists for this consultation
+    const existing = await ctx.db
+      .query("triageResults")
+      .withIndex("by_consultation", (q) => q.eq("consultationId", args.consultationId))
+      .first();
+    if (existing) {
+      throw new Error("A triage result already exists for this consultation. Use updateTriage if needed.");
+    }
     return await ctx.db.insert("triageResults", {
       patientId: args.patientId,
       consultationId: args.consultationId,

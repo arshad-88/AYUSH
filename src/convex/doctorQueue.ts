@@ -40,7 +40,14 @@ export const enqueueCaseSheet = mutation({
     if (!user) throw new Error("Not authenticated");
     const patient = await ctx.db.get(args.patientId);
     if (!patient) throw new Error("Patient not found");
-    // For now, any authenticated user can enqueue; later restrict to doctors.
+    // Check if already queued for this case sheet
+    const existing = await ctx.db
+      .query("doctorQueue")
+      .filter((q) => q.eq(q.field("caseSheetId"), args.caseSheetId))
+      .first();
+    if (existing) {
+      throw new Error("This case sheet is already in the queue.");
+    }
     const now = Date.now();
     return await ctx.db.insert("doctorQueue", {
       caseSheetId: args.caseSheetId,

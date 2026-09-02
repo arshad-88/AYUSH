@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
@@ -25,7 +28,18 @@ const typeConfig: Record<string, { icon: typeof Stethoscope; color: string; bg: 
 
 export default function Timeline() {
   const navigate = useNavigate();
-  const { timeline, documents, setStep, clinicalState } = usePatientStore();
+  const { timeline, documents, setStep, clinicalState, id: patientId } = usePatientStore();
+
+  // Hydrate timeline from Convex
+  const convexTimeline = useQuery(
+    api.timelineEvents.getTimelineByPatient,
+    patientId ? { patientId: patientId as any } : "skip"
+  );
+  useEffect(() => {
+    if (convexTimeline !== undefined) {
+      usePatientStore.setState({ timeline: convexTimeline });
+    }
+  }, [convexTimeline]);
 
   const derivedDocumentTimeline = (documents ?? []).flatMap((doc) => {
     const dateValue = doc.extractedData?.date;

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { PriorityBadge } from "@/components/shared/PriorityBadge";
@@ -23,16 +25,39 @@ import {
 
 export default function Triage() {
   const navigate = useNavigate();
-  const { chiefComplaint, socrates, age, timeline, documents, triage, setTriage, setStep } =
+  const { chiefComplaint, socrates, age, timeline, documents, triage, setTriage, setStep, consultationId, id: patientId } =
     usePatientStore();
   const [isAnalyzing, setIsAnalyzing] = useState(!triage);
   const [explainability, setExplainability] = useState<Explainability | null>(null);
 
+  // Load existing triage from Convex
+  const existingTriage = useQuery(
+    api.triageResults.getTriageByConsultation,
+    consultationId ? { consultationId: consultationId as any } : "skip"
+  );
+  const createTriage = useMutation(api.triageResults.createTriage);
+
   useEffect(() => {
-    if (!triage) {
-      runTriage();
+    if (existingTriage !== undefined) {
+      if (existingTriage) {
+        setTriage(existingTriage);
+        setIsAnalyzing(false);
+        // Build explainability from existing
+        const explanation: Explainability = {
+          factors: [
+            { factor: "Symptom Severity", impact: "high", description: "Based on severity scale", detected: existingTriage.reasons.some((r: string) => r.toLowerCase().includes("severity")) },
+            { factor: "Onset", impact: "medium", description: "How symptoms started", detected: existingTriage.reasons.some((r: string) => r.toLowerCase().includes("onset")) }
+          ],
+          overallConfidence: existingTriage.confidence,
+          disclaimer: "AI-assisted priority recommendation. Doctor verification required."
+        };
+        setExplainability(explanation);
+      } else if (!triage) {
+        // No existing, run triage
+        runTriage();
+      }
     }
-  }, []);
+  }, [existingTriage]);
 
   const runTriage = async () => {
     setIsAnalyzing(true);
@@ -46,17 +71,32 @@ export default function Triage() {
     } as any);
 
     setTriage(result);
-    // Explainability might be missing from the new interface, we can mock it here for now
     const explanation: Explainability = {
       factors: [
-        { factor: "Symptom Severity", impact: "high", description: "Based on severity scale", detected: result.reasons.some(r => r.toLowerCase().includes("severity")) },
-        { factor: "Onset", impact: "medium", description: "How symptoms started", detected: result.reasons.some(r => r.toLowerCase().includes("onset")) }
+        { factor: "Symptom Severity", impact: "high", description: "Based on severity scale", detected: result.reasons.some((r: string) => r.toLowerCase().includes("severity")) },
+        { factor: "Onset", impact: "medium", description: "How symptoms started", detected: result.reasons.some((r: string) => r.toLowerCase().includes("onset")) }
       ],
       overallConfidence: result.confidence,
       disclaimer: "AI-assisted priority recommendation. Doctor verification required."
     };
     setExplainability(explanation);
     setIsAnalyzing(false);
+
+    // Persist to Convex
+    if (consultationId && patientId) {
+      try {
+        await createTriage({
+          patientId: patientId as any,
+          consultationId: consultationId as any,
+          priority: result.priority as any,
+          reasons: result.reasons,
+          confidence: result.confidence,
+          timestamp: result.timestamp || new Date().toISOString(),
+        });
+      } catch (err) {
+        console.error("Failed to save triage:", err);
+      }
+    }
   };
 
   const priorityConfig: Record<string, any> = {
