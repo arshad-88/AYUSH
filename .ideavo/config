@@ -1,0 +1,42 @@
+{
+  "systemSetup": [],
+  "templateName": "custom",
+  "projectDependencies": [
+    {
+      "name": "Install Dependencies",
+      "command": "bun install"
+    }
+  ],
+  "codeChecks": [
+    {
+      "name": "Lint",
+      "command": "bun run lint"
+    }
+  ],
+  "buildSteps": [
+    {
+      "name": "Build Project",
+      "command": "bun run build"
+    }
+  ],
+  "runStep": [
+    {
+      "name": "Run Dev Server",
+      "command": "bun run dev --port 4173",
+      "port": "4173"
+    }
+  ],
+  "deploySteps": [],
+  "cleanupFiles": [
+    "node_modules",
+    "dist",
+    ".vite"
+  ],
+  "packageManager": "bun",
+  "envPaths": [
+    {
+      "name": "default",
+      "path": ".env"
+    }
+  ]
+}
