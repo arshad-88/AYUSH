@@ -23,6 +23,69 @@ const pickValue = (values: string[]): string => {
   return cleaned.length ? cleaned[0] : "Not detected";
 };
 
+/* ======================================================================
+   HANDWRITTEN MEDICATION PARSER
+   ----------------------------------------------------------------------
+   When a prescription is handwritten the OCR often returns text that lacks
+   the "Medication:" label. This routine walks each line, normalizes common
+   prescription shorthand, and pulls out anything that looks like a drug
+   entry — including strengths (mg/mcg), frequencies (OD/BD/TID/QID/HS/PRN),
+   and durations ("x 7 days"). Multiple matches are de-duplicated.
+   ====================================================================== */
+const PRESCRIPTION_KEYWORDS =
+  /\b(tab\.?|cap\.?|syp\.?|syr\.?|inj\.?|drop|oint\.?|cream|gel|tabs\.?|caps\.?|tablets|capsules|tablet|capsule|syrup|injection|rx)\b/i;
+const STRENGTH = /\b\d+\s?(?:mg|mcg|g|ml|iu|units?|mmol)\b/i;
+const FREQUENCY =
+  /\b(?:OD|BD|TID|QID|HS|PRN|SOS|STAT|q\d+h|once daily|twice daily|thrice daily|at night|before food|after food|with food|empty stomach|AC|PC|AM|PM)\b/i;
+const DURATION = /\b(?:for\s+\d+\s+(?:day|days|week|weeks|month|months|year|years)|x\s+\d+\s+(?:day|days|week|weeks|month|months))\b/i;
+
+const isLikelyMedicationLine = (line: string): boolean => {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (trimmed.length > 140) return false;
+  if (!STRENGTH.test(trimmed) && !PRESCRIPTION_KEYWORDS.test(trimmed) && !FREQUENCY.test(trimmed)) {
+    return false;
+  }
+  // Skip lines that look like dates / addresses / phone numbers.
+  if (/^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/.test(trimmed)) return false;
+  if (/(?:phone|mobile|tel|address|opd|ipd|mr\.|mrs\.)/i.test(trimmed)) return false;
+  return /[A-Za-z]/.test(trimmed);
+};
+
+const normalizeFrequency = (line: string): string => {
+  return line
+    .replace(/\b1-0-1\b/g, "BD")
+    .replace(/\b1-1-1\b/g, "TID")
+    .replace(/\b1-0-0\b/g, "OD")
+    .replace(/\b0-1-0\b/g, "HS")
+    .replace(/\bS\/O\.\s?S\./gi, "SOS")
+    .replace(/\bbd\b/gi, "BD")
+    .replace(/\bod\b/gi, "OD")
+    .replace(/\btid\b/gi, "TID")
+    .replace(/\bqid\b/gi, "QID")
+    .replace(/\bhs\b/gi, "HS");
+};
+
+const extractMedicationsFromFreeText = (text: string): string[] => {
+  const results: string[] = [];
+  const seen = new Set<string>();
+
+  text
+    .split(/\r?\n|(?<=\.)\s+/)
+    .map((line) => normalizeFrequency(line.trim()))
+    .filter(isLikelyMedicationLine)
+    .forEach((line) => {
+      // Normalize leading numeric bullets ("1. Tab. Paracetamol..." → "Tab. ...").
+      const cleaned = line.replace(/^\d+[.)]\s*/, "");
+      const key = cleaned.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      results.push(cleaned);
+    });
+
+  return results;
+};
+
 const getDateValue = (text: string): { value: string; confidence: number; status: "exact" | "approximate" | "unknown" } => {
   const exactPatterns = [
     /(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/,
@@ -135,7 +198,7 @@ export function parseDocumentText(rawText: string, documentId: string): ParsedDo
     text,
     /(?:Medication|Medications|Prescription|Rx|Tablet|Tablets|Capsule|Capsules|Syrup|Injection|Dose|Drug)\s*[:\-]\s*(.*)/i,
     4
-  );
+  ).concat(extractMedicationsFromFreeText(text));
 
   const allergyMatches = collectMatches(
     text,

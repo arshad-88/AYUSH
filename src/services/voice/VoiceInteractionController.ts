@@ -182,9 +182,11 @@ export class VoiceInteractionController {
       }, ASR_TIMEOUT);
 
       // Start ASR
-      this.asrService.startListening(this.config.language, (result) => {
-        this.handleAsrResult(result);
-      });
+      this.asrService.startListening(
+        this.config.language,
+        (result) => this.handleAsrResult(result),
+        (errMsg) => this.handleVoiceError(errMsg)
+      );
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "ASR failed";
       this.handleVoiceError(errorMsg);
@@ -279,9 +281,11 @@ export class VoiceInteractionController {
     this.lastFinalTranscript = "";
 
     try {
-      this.asrService.startListening(this.config.language, (result) => {
-        this.handleAsrResult(result);
-      });
+      this.asrService.startListening(
+        this.config.language,
+        (result) => this.handleAsrResult(result),
+        (errMsg) => this.handleVoiceError(errMsg)
+      );
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : "ASR failed";
       this.handleVoiceError(errorMsg);

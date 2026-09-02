@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type ReactElement } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, MeshDistortMaterial, MeshTransmissionMaterial } from "@react-three/drei";
 import * as THREE from "three";
@@ -28,7 +28,7 @@ function DNAStrand() {
     return v;
   });
 
-  const tubes: JSX.Element[] = [];
+  const tubes: ReactElement[] = [];
   for (let i = 0; i < points - 1; i++) {
     const a1 = strandA[i];
     const a2 = strandA[i + 1];
@@ -131,7 +131,7 @@ function MolecularStructure() {
     { pos: [-0.5, -0.3, -1.1] as [number, number, number], color: "#FCA5A5" },
   ];
 
-  const bonds: JSX.Element[] = [];
+  const bonds: ReactElement[] = [];
   satellites.forEach((sat, i) => {
     const start = new THREE.Vector3(0, 0, 0);
     const end = new THREE.Vector3(...sat.pos);
@@ -331,7 +331,7 @@ function ProteinFold() {
     );
   });
 
-  const tubeSegments: JSX.Element[] = [];
+  const tubeSegments: ReactElement[] = [];
   for (let i = 0; i < points.length - 1; i++) {
     const a = points[i];
     const b = points[i + 1];
@@ -425,7 +425,7 @@ function NeuralPathway() {
 
   grow(new THREE.Vector3(0, -1.4, 0), new THREE.Vector3(0, 1, 0), 2, colors[0]);
 
-  const lines: JSX.Element[] = [];
+  const lines: ReactElement[] = [];
   branches.forEach((branch, i) => {
     for (let j = 0; j < branch.points.length - 1; j++) {
       const a = branch.points[j];
@@ -444,7 +444,7 @@ function NeuralPathway() {
     }
   });
 
-  const nodes: JSX.Element[] = [];
+  const nodes: ReactElement[] = [];
   branches.forEach((branch, i) => {
     branch.points.forEach((p, j) => {
       if (j === 0 || j === branch.points.length - 1) {

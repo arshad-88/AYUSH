@@ -7,15 +7,26 @@ export class MockAsrService implements AsrService {
     return true; // Mock is always supported
   }
 
-  startListening(language: string, onResult: (result: TranscriptionResult) => void): void {
-    // Simulate someone speaking after a brief delay
-    this.timer = setTimeout(() => {
-      onResult({
-        text: "This is a simulated voice response for demo purposes.",
-        isFinal: true,
-        languageCode: language,
-      });
-    }, 2500);
+  startListening(
+    language: string,
+    onResult: (result: TranscriptionResult) => void,
+    _onError?: (msg: string) => void
+  ): void {
+    // Stream a few interim chunks then a final result so the UI shows life.
+    const chunks = [
+      "I've been having",
+      "I've been having chest pain since",
+      "I've been having chest pain since yesterday evening",
+    ];
+    chunks.forEach((text, i) => {
+      setTimeout(() => {
+        onResult({
+          text,
+          isFinal: i === chunks.length - 1,
+          languageCode: language,
+        });
+      }, 700 + i * 700);
+    });
   }
 
   stopListening(): void {

@@ -6,18 +6,23 @@ import { useConvexPatient } from "@/hooks/useConvexPatient";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { ShieldAlert, ArrowRight, ShieldCheck, FileText, Lock, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StatusBar, ParticleField } from "@/components/scientific";
 
 export default function Consent() {
   const navigate = useNavigate();
-  const { setConsent, setStep } = usePatientStore();
+  const { setConsent, setStep, consentGiven } = usePatientStore();
   const { persistPatientUpdate } = useConvexPatient();
   const [isSaving, setIsSaving] = useState(false);
 
-  const { consentGiven } = usePatientStore();
+  useEffect(() => {
+    if (consentGiven) {
+      navigate("/patient/language", { replace: true });
+    }
+  }, [consentGiven, navigate]);
 
   const handleConsent = async () => {
+    if (isSaving) return;
     setIsSaving(true);
     try {
       await persistPatientUpdate({ consentGiven: true });
@@ -26,15 +31,9 @@ export default function Consent() {
       navigate("/patient/language");
     } catch (error) {
       console.error("Failed to save consent:", error);
-    } finally {
       setIsSaving(false);
     }
   };
-
-  if (consentGiven) {
-    navigate("/patient/language", { replace: true });
-    return null;
-  }
 
   return (
     <div className="min-h-screen flex flex-col relative">

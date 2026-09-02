@@ -25,6 +25,7 @@ import {
 import {
   AreaSparkline,
   BiomarkerBar,
+  HeroCanvas,
   ParticleField,
   RadialGauge,
   RingProgress,
@@ -370,6 +371,53 @@ export default function Technology() {
             </div>
           </div>
 
+          {/* Contextual 3D Models */}
+          <div className="grid lg:grid-cols-2 gap-10 mt-4">
+            <div className="lab-card lab-card-elevated lab-card-accent p-8 relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                  <Brain className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
+                </div>
+                <div>
+                  <h3 className="font-bold tracking-tight-x">Neural Pathway Engine</h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    INTERVIEW QUESTION TREE · SOCRATES
+                  </span>
+                </div>
+              </div>
+              <div className="aspect-square max-h-[360px] mx-auto w-full rounded-2xl overflow-hidden inner-glow-bl">
+                <HeroCanvas className="w-full h-full" variant="neural" cameraDistance={4.5} />
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mt-5">
+                Branching synaptic tree mirrors the adaptive SOCRATES interview. Each
+                dendritic fork represents a question path, with stronger signals
+                surfacing symptoms earlier in the workflow.
+              </p>
+            </div>
+
+            <div className="lab-card lab-card-elevated lab-card-accent p-8 relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                  <Cpu className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                </div>
+                <div>
+                  <h3 className="font-bold tracking-tight-x">Drug-Target Binding</h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    PHARMACOLOGY · INTERACTION GRAPH
+                  </span>
+                </div>
+              </div>
+              <div className="aspect-square max-h-[360px] mx-auto w-full rounded-2xl overflow-hidden inner-glow-tr">
+                <HeroCanvas className="w-full h-full" variant="drugtarget" cameraDistance={5.5} />
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mt-5">
+                A target protein (left) and an oscillating drug molecule (right)
+                connected by an energy field. Real-time affinity scoring is what
+                powers our medication-interaction warnings.
+              </p>
+            </div>
+          </div>
+
           {/* Metrics row */}
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="lab-card lab-card-accent p-5">
@@ -442,6 +490,53 @@ export default function Technology() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Protein Fold — context-rich biomarker visualization */}
+          <div className="lab-card lab-card-elevated lab-card-accent p-8 relative overflow-hidden">
+            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                    <Activity className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold tracking-tight-x">Protein Fold Visualization</h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      BIOMARKER CHAIN · 80 RESIDUES
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Each sphere represents a residue in the patient's biomarker chain.
+                  Color coding indicates state — green for stable, amber for elevated,
+                  red for critical — and helix rotation reveals progression across the
+                  clinical timeline.
+                </p>
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  <div className="lab-card-floating p-3">
+                    <span className="eyebrow text-[9px]">RESIDUES</span>
+                    <p className="data-figure-lg text-2xl font-bold text-trust-300 mt-1">
+                      <RingProgress value={80} size={32} thickness={3} variant="primary" showValue={false} />
+                    </p>
+                    <p className="data-figure text-[10px] text-muted-foreground mt-1">80 / 80</p>
+                  </div>
+                  <div className="lab-card-floating p-3">
+                    <span className="eyebrow text-[9px]">STABLE</span>
+                    <p className="data-figure-lg text-2xl font-bold text-mint-400 mt-1">72</p>
+                    <p className="data-figure text-[10px] text-muted-foreground mt-1">WITHIN RANGE</p>
+                  </div>
+                  <div className="lab-card-floating p-3">
+                    <span className="eyebrow text-[9px]">FLAGS</span>
+                    <p className="data-figure-lg text-2xl font-bold text-amber-warn mt-1">8</p>
+                    <p className="data-figure text-[10px] text-muted-foreground mt-1">REVIEW REQ.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="aspect-square max-h-[360px] mx-auto w-full rounded-2xl overflow-hidden inner-glow-bl">
+                <HeroCanvas className="w-full h-full" variant="protein" cameraDistance={5.5} />
+              </div>
             </div>
           </div>
 

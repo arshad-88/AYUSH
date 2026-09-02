@@ -31,7 +31,7 @@ import {
 import {
   BiomarkerBar,
   EkgWave,
-  HeroCanvas,
+  AnatomicalHeart,
   StatusBar,
   BarChart,
   AreaSparkline,
@@ -90,8 +90,8 @@ export default function Landing() {
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28 sm:pt-28 sm:pb-40">
-          <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-20 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-36 sm:pt-32 sm:pb-52">
+          <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-24 items-center">
             <motion.div
               initial="initial"
               animate="animate"
@@ -173,10 +173,10 @@ export default function Landing() {
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative aspect-square max-w-[600px] mx-auto w-full"
+              className="relative aspect-square max-w-[620px] mx-auto w-full"
             >
               <div className="absolute inset-0 bg-gradient-radial from-trust-500/20 via-transparent to-transparent blur-3xl" />
-              <HeroCanvas className="absolute inset-0" variant="heart" />
+              <AnatomicalHeart className="absolute inset-0" size={620} />
 
               {/* Floating data panels — deeper layering, more whitespace */}
               <motion.div
@@ -260,7 +260,7 @@ export default function Landing() {
         {/* KPI band — doubled whitespace */}
         <div className="relative border-y border-trust-500/15 bg-bio-base/50 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-12">
               <KpiCell label="TODAY'S OPD" value={opdStats.todaysOPD} suffix="cases" trend="+12%" />
               <KpiCell label="HIGH RISK" value={opdStats.highRisk} suffix="flagged" trend="real-time" variant="critical" />
               <KpiCell label="PRIORITY" value={opdStats.priority} suffix="pending" trend="queue" variant="warning" />
@@ -271,7 +271,7 @@ export default function Landing() {
       </section>
 
       {/* HOW IT WORKS — deeper whitespace */}
-      <section id="how-it-works" className="relative section-pad">
+      <section id="how-it-works" className="relative section-pad-xl">
         <div className="absolute inset-0 surface-grid opacity-20 pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
@@ -286,7 +286,7 @@ export default function Landing() {
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-80px" }}
-            className="mt-20 lab-card lab-card-elevated lab-card-accent p-10 sm:p-14 relative overflow-hidden"
+            className="mt-24 lab-card lab-card-elevated lab-card-accent p-12 sm:p-16 relative overflow-hidden"
           >
             <div className="absolute top-3 right-3">
               <StatusBar latency="42ms" sessionId="PIPELINE-VIEW" />
@@ -314,7 +314,7 @@ export default function Landing() {
       </section>
 
       {/* FOR PATIENTS */}
-      <section id="for-patients" className="relative section-pad">
+      <section id="for-patients" className="relative section-pad-xl">
         <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
@@ -328,7 +328,7 @@ export default function Landing() {
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-80px" }}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-20"
           >
             {[
               {
@@ -407,7 +407,7 @@ export default function Landing() {
       </section>
 
       {/* FOR DOCTORS */}
-      <section id="for-doctors" className="relative section-pad overflow-hidden">
+      <section id="for-doctors" className="relative section-pad-xl overflow-hidden">
         <div className="absolute inset-0 surface-grid opacity-20 pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
@@ -422,7 +422,7 @@ export default function Landing() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8 }}
-            className="mt-16 grid lg:grid-cols-2 gap-8"
+            className="mt-20 grid lg:grid-cols-2 gap-10"
           >
             <div className="lab-card lab-card-elevated lab-card-accent p-8 sm:p-10">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -488,7 +488,7 @@ export default function Landing() {
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-80px" }}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-10"
           >
             {[
               {
@@ -549,7 +549,7 @@ export default function Landing() {
       </section>
 
       {/* CAPABILITIES */}
-      <section className="relative section-pad">
+      <section className="relative section-pad-xl">
         <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
@@ -558,7 +558,7 @@ export default function Landing() {
             subtitle="Clinical-grade AI, deterministic safety rails, and ABDM-native interoperability — engineered for Indian public health."
           />
 
-          <div className="mt-16 grid lg:grid-cols-3 gap-8">
+          <div className="mt-20 grid lg:grid-cols-3 gap-10">
             {[
               {
                 icon: Atom,
@@ -635,7 +635,7 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="relative section-pad">
+      <section className="relative section-pad-xl">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
