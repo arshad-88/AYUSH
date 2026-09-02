@@ -73,15 +73,16 @@ export default function DocumentUpload() {
   const [processedDocument, setProcessedDocument] = useState<DocumentExtraction | null>(null);
   const [editingFactKey, setEditingFactKey] = useState<string | null>(null);
   const [draftFactValue, setDraftFactValue] = useState<string>("");
-
+  const [isSaving, setIsSaving] = useState(false);
+ 
   const convexDocs = useQuery(api.documents.getDocumentsByPatient, patientId ? { patientId: patientId as any } : "skip");
   const createDocument = useMutation(api.documents.createDocument);
   const updateDocument = useMutation(api.documents.updateDocument);
-
-  // Hydrate from Convex on mount
+ 
+  // Hydrate from Convex on mount (overwrites Zustand to ensure consistency)
   useEffect(() => {
-    if (convexDocs && convexDocs.length > 0 && documents.length === 0) {
-      // Convert Convex documents to store format (simplified)
+    if (convexDocs !== undefined) {
+      // Convert Convex documents to store format
       const storeDocs: DocumentExtraction[] = convexDocs.map((doc: any) => ({
         id: doc._id,
         fileName: doc.filename,
@@ -102,18 +103,24 @@ export default function DocumentUpload() {
         warnings: doc.warnings,
         error: doc.error,
       }));
-      storeDocs.forEach((doc) => addDocument(doc));
+      // Replace Zustand documents with Convex data
+      usePatientStore.setState({ documents: storeDocs });
     }
-  }, [convexDocs, documents.length, addDocument]);
+  }, [convexDocs]);
 
   const uploadedDocs = useMemo(() => documents ?? [], [documents]);
 
-  const applyFactReview = (factField: string, action: "confirm" | "edit" | "reject", editedValue?: string) => {
+  const applyFactReview = async (factField: string, action: "confirm" | "edit" | "reject", editedValue?: string) => {
     if (!processedDocument) return;
-
+    if (!patientId) {
+      setError("Patient not authenticated.");
+      return;
+    }
+    setIsSaving(true);
+ 
     const nextFacts: ClinicalFact[] = (processedDocument.documentFacts ?? []).map((fact): ClinicalFact => {
       if (fact.field !== factField) return fact;
-
+ 
       if (action === "confirm") {
         return {
           ...fact,
@@ -124,7 +131,7 @@ export default function DocumentUpload() {
           verifiedAt: new Date().toISOString(),
         } as ClinicalFact;
       }
-
+ 
       if (action === "reject") {
         return {
           ...fact,
@@ -135,7 +142,7 @@ export default function DocumentUpload() {
           verifiedAt: new Date().toISOString(),
         } as ClinicalFact;
       }
-
+ 
       const finalValue = (editedValue ?? fact.editedValue ?? fact.value).trim();
       return {
         ...fact,
@@ -148,14 +155,14 @@ export default function DocumentUpload() {
         verifiedAt: new Date().toISOString(),
       } as ClinicalFact;
     });
-
+ 
     const updatedDoc: DocumentExtraction = {
       ...processedDocument,
       documentFacts: nextFacts,
       verificationStatus: nextFacts.some((fact) => fact.status === "rejected") ? "rejected" : nextFacts.some((fact) => fact.verified) ? "verified" : "requires-review",
       reviewRequired: nextFacts.some((fact) => !fact.verified && fact.status !== "rejected"),
     };
-
+ 
     setProcessedDocument(updatedDoc);
     usePatientStore.setState((state) => ({
       documents: state.documents.map((doc) => doc.id === processedDocument.id ? { ...doc, ...updatedDoc } : doc),
@@ -168,7 +175,28 @@ export default function DocumentUpload() {
         }),
       },
     }));
-
+ 
+    // Persist to Convex if the document has a Convex ID (not a local one)
+    const docId = processedDocument.id;
+    if (docId && !docId.startsWith("doc-")) {
+      try {
+        await updateDocument({
+          documentId: docId as any,
+          documentFacts: nextFacts,
+          verificationStatus: updatedDoc.verificationStatus,
+          reviewRequired: updatedDoc.reviewRequired,
+          warnings: updatedDoc.warnings,
+        });
+      } catch (err) {
+        console.error("Failed to update document in Convex:", err);
+        setError("Failed to save document changes. Please try again.");
+        // Revert local state? For simplicity, we keep the local change but show error.
+      }
+    } else {
+      // Local document, just update local state
+    }
+ 
+    setIsSaving(false);
     setEditingFactKey(null);
     setDraftFactValue("");
   };
@@ -198,22 +226,26 @@ export default function DocumentUpload() {
 
   const handleProcess = async () => {
     if (!selectedFile) return;
+    if (!patientId) {
+      setError("Patient not authenticated. Please login again.");
+      return;
+    }
     setIsProcessing(true);
     setError(null);
-
+ 
     try {
       const ocrService = getOcrService();
       const result = await ocrService.extractText(selectedFile);
-
+ 
       if (!result?.text?.trim()) {
         throw new Error("OCR returned an empty result.");
       }
-
+ 
       const documentId = buildDocumentId(selectedFile);
       const documentIntelligence = await getDocumentIntelligenceService().analyzeDocument(selectedFile, result.text);
       const allowedMedicalDocument = documentIntelligence.documentType !== "unknown" && documentIntelligence.documentType !== "identity-document";
       const summary = buildSummaryFromAnalysis(documentIntelligence);
-
+ 
       const docRecord: DocumentExtraction = {
         id: documentId,
         fileName: selectedFile.name,
@@ -238,15 +270,48 @@ export default function DocumentUpload() {
         verificationStatus: documentIntelligence.verificationStatus,
         warnings: documentIntelligence.warnings,
       };
-
+ 
       setOcrText(result.text);
       setProcessedDocument(docRecord);
-
+ 
+      // Persist to Convex
+      try {
+        const convexDocId = await createDocument({
+          patientId: patientId as any,
+          consultationId: consultationId ? (consultationId as any) : undefined,
+          filename: selectedFile.name,
+          fileType: selectedFile.type || "application/octet-stream",
+          documentType: docRecord.documentType,
+          uploadTimestamp: Date.now(),
+          processingStatus: docRecord.status === "failed" ? "failed" : "completed",
+          extractedData: docRecord.extractedData,
+          confidence: docRecord.confidence,
+          rawText: docRecord.rawText,
+          documentFacts: docRecord.documentFacts,
+          verificationStatus: docRecord.verificationStatus,
+          warnings: docRecord.warnings,
+          reviewRequired: docRecord.reviewRequired,
+          classificationConfidence: docRecord.classificationConfidence,
+          classificationConfidenceLevel: docRecord.classificationConfidenceLevel,
+          error: docRecord.error,
+        });
+        // Update local doc with Convex ID
+        const docWithId = { ...docRecord, id: convexDocId };
+        setProcessedDocument(docWithId);
+        docRecord.id = convexDocId;
+      } catch (err) {
+        console.error("Failed to save document to Convex:", err);
+        setError("Document processed but failed to save. Please try again.");
+        // Still keep local doc but mark error
+        docRecord.error = "Failed to persist to backend";
+        setProcessedDocument(docRecord);
+      }
+ 
       const existingRefs = new Set(clinicalState.documentReferences ?? []);
       const existingFacts = [...(clinicalState.documentFacts ?? [])];
       const nextRefs = [...existingRefs];
-      if (!existingRefs.has(documentId)) nextRefs.push(documentId);
-
+      if (!existingRefs.has(docRecord.id)) nextRefs.push(docRecord.id);
+ 
       const nextFacts = [...existingFacts];
       if (allowedMedicalDocument) {
         summary.documentFacts.forEach((fact) => {
@@ -254,12 +319,12 @@ export default function DocumentUpload() {
           if (!exists) nextFacts.push(fact);
         });
       }
-
+ 
       updateClinicalState({
         documentFacts: nextFacts,
         documentReferences: nextRefs,
       });
-
+ 
       addDocument(docRecord);
     } catch (err) {
       console.error("OCR processing failed:", err);
