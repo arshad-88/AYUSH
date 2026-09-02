@@ -2,7 +2,6 @@ import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePatientStore } from "@/store/patientStore";
 import { useQuery, useMutation } from "convex/react";
@@ -22,7 +21,16 @@ import {
   Eye,
   X,
   AlertCircle,
+  Cpu,
+  ScanLine,
 } from "lucide-react";
+import {
+  BiomarkerBar,
+  DNASpinner,
+  EkgWave,
+  RingProgress,
+  StatusBar,
+} from "@/components/scientific";
 
 const ALLOWED_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/jpg"];
 
@@ -410,9 +418,10 @@ export default function DocumentUpload() {
   };
 
   return (
-    <div className="min-h-screen vintage-texture">
+    <div className="min-h-screen relative">
+      <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
       <Header />
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="relative max-w-3xl mx-auto px-4 py-8">
         <div className="mb-6">
           <StepProgress
             currentStep="documents"
@@ -421,190 +430,274 @@ export default function DocumentUpload() {
         </div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-vintage-teal/10 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-vintage-teal" />
+          <div className="lab-card lab-card-accent p-6 relative overflow-hidden">
+            <div className="absolute top-3 right-3">
+              <StatusBar latency="42ms" sessionId="OCR-ENGINE" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground" >
-                Document Intelligence
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Upload prescriptions, lab reports, or medical records for structured extraction and review
-              </p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500/20 to-amber-warn/20 border border-teal-500/30 flex items-center justify-center glow-accent">
+                <FileText className="w-6 h-6 text-teal-400" strokeWidth={1.6} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="data-figure text-[10px] tracking-widest text-mint-400">● OCR READY</span>
+                </div>
+                <h1 className="text-xl font-bold tracking-tight-x">
+                  Document Intelligence
+                </h1>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  UPLOAD · EXTRACT · STRUCTURE · VERIFY
+                </span>
+              </div>
             </div>
           </div>
 
-          <Card className="vintage-card">
-            <CardContent className="p-6">
-              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-vintage-teal/40 hover:bg-vintage-teal/5 transition-all">
-                <Upload className="w-10 h-10 text-muted-foreground mb-3" />
-                <p className="text-sm text-muted-foreground font-medium">Click to upload or drag and drop</p>
-                <p className="text-xs text-muted-foreground mt-1">PDF, JPG, PNG — Max 10MB</p>
-                <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,image/png,image/jpeg,application/pdf" onChange={handleFileSelect} />
-              </label>
+          <div className="lab-card lab-card-accent p-6 relative overflow-hidden">
+            <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-trust-500/30 rounded-xl cursor-pointer hover:border-trust-400/60 hover:bg-trust-500/5 transition-all group">
+              <div className="relative">
+                <Upload className="w-10 h-10 text-trust-400 mb-3 group-hover:scale-110 transition-transform" />
+                <ScanLine className="absolute inset-0 w-10 h-10 text-trust-400/30" />
+              </div>
+              <p className="text-sm font-medium mt-2">Click to upload or drag and drop</p>
+              <p className="data-figure text-[10px] text-muted-foreground mt-1 tracking-widest">
+                PDF · JPG · PNG · MAX 10MB
+              </p>
+              <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,image/png,image/jpeg,application/pdf" onChange={handleFileSelect} />
+            </label>
 
-              {selectedFile && (
-                <div className="mt-4 p-3 rounded-lg bg-muted flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-vintage-teal" />
-                    <span className="text-sm text-foreground">{selectedFile.name}</span>
-                    <span className="text-xs text-muted-foreground">({(selectedFile.size / 1024).toFixed(1)} KB)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {!processedDocument && (
-                      <Button size="sm" className="bg-vintage-teal hover:bg-vintage-teal/90 text-white" onClick={handleProcess} disabled={isProcessing}>
-                        {isProcessing ? <><Loader2 className="w-3 h-3 animate-spin mr-1" />Processing...</> : <><Eye className="w-3 h-3 mr-1" />Extract Data</>}
-                      </Button>
-                    )}
-                    <Button size="sm" variant="ghost" onClick={removeSelected}><X className="w-4 h-4" /></Button>
-                  </div>
+            {selectedFile && (
+              <div className="mt-4 p-3 rounded-md bg-bio-base/50 border border-trust-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-teal-400" />
+                  <span className="text-sm">{selectedFile.name}</span>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-wider">
+                    ({(selectedFile.size / 1024).toFixed(1)} KB)
+                  </span>
                 </div>
-              )}
-
-              {error && (
-                <div className="mt-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 mt-0.5" />
-                  <p className="text-sm">{error}</p>
+                <div className="flex items-center gap-2">
+                  {!processedDocument && (
+                    <Button size="sm" className="bg-gradient-to-r from-trust-500 to-teal-500 text-white border-0" onClick={handleProcess} disabled={isProcessing}>
+                      {isProcessing ? (
+                        <>
+                          <DNASpinner size="sm" />
+                          <span className="ml-1 data-figure tracking-wider">Processing…</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3 mr-1" />
+                          Extract Data
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" onClick={removeSelected} className="hover:bg-trust-500/10">
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {isProcessing && (
-                <div className="mt-4 flex items-center justify-center gap-3 p-4 rounded-lg bg-vintage-teal/5">
-                  <Loader2 className="w-5 h-5 animate-spin text-vintage-teal" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">OCR Processing...</p>
-                    <p className="text-xs text-muted-foreground">Extracting document type, evidence, and structured facts</p>
-                  </div>
+            {error && (
+              <div className="mt-4 p-3 rounded-md tag-critical flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5" />
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
+            {isProcessing && (
+              <div className="mt-4 lab-card-accent p-4 flex items-center gap-3">
+                <DNASpinner size="md" />
+                <div>
+                  <p className="text-sm font-medium tracking-tight-x">OCR Processing</p>
+                  <p className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    EXTRACTING TYPE · EVIDENCE · STRUCTURED FACTS
+                  </p>
                 </div>
-              )}
+              </div>
+            )}
 
-              <DisclaimerBanner type="simulated" className="mt-4" />
-            </CardContent>
-          </Card>
+            <div className="mt-4">
+              <DisclaimerBanner type="simulated" />
+            </div>
+          </div>
 
           {processedDocument && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="vintage-card">
-                <CardHeader>
-                  <CardTitle className="text-sm" >
-                    Structured extraction
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Document type</p>
-                      <p className="text-sm font-semibold text-foreground">{processedDocument.documentType ?? "unknown"}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Confidence</p>
-                      <p className="text-sm font-semibold text-vintage-blue">{processedDocument.classificationConfidenceLevel ?? "low"}</p>
-                    </div>
+              <div className="lab-card lab-card-accent p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                    <Cpu className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
                   </div>
+                  <div>
+                    <h3 className="font-bold tracking-tight-x">Structured Extraction</h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      OCR + NER · CONFIDENCE-SCORED
+                    </span>
+                  </div>
+                </div>
 
-                  <div className="grid grid-cols-1 gap-3">
-                    {Object.entries(processedDocument.extractedData ?? {}).filter(([_, value]) => value && String(value).trim()).map(([key, value]) => (
-                      <div key={key} className="p-3 rounded-lg bg-parchment border border-border">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{key}</p>
-                          <span className={`text-[10px] font-bold ${processedDocument.confidence?.[key] && processedDocument.confidence[key] >= 0.8 ? "text-vintage-green" : processedDocument.confidence?.[key] && processedDocument.confidence[key] >= 0.5 ? "text-vintage-gold" : "text-muted-foreground"}`}>
-                            {processedDocument.confidence?.[key] ? `${Math.round((processedDocument.confidence[key] ?? 0) * 100)}%` : "low"}
+                <div className="flex items-center justify-between rounded-md border border-trust-500/20 bg-bio-base/40 p-3 mb-4">
+                  <div>
+                    <span className="data-figure text-[10px] tracking-widest text-muted-foreground">DOCUMENT TYPE</span>
+                    <p className="text-sm font-semibold mt-0.5">{processedDocument.documentType ?? "unknown"}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="data-figure text-[10px] tracking-widest text-muted-foreground">CONFIDENCE</span>
+                    <p className="text-sm font-semibold mt-0.5 text-teal-400">{processedDocument.classificationConfidenceLevel ?? "low"}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {Object.entries(processedDocument.extractedData ?? {}).filter(([_, value]) => value && String(value).trim()).map(([key, value]) => {
+                    const conf = processedDocument.confidence?.[key];
+                    const confVal = conf ? Math.round(conf * 100) : 0;
+                    return (
+                      <div key={key} className="p-3 rounded-md bg-teal-500/8 border border-teal-500/25">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="data-figure text-[10px] font-bold tracking-widest text-muted-foreground">
+                            {key}
+                          </span>
+                          <span className={`data-figure text-[10px] font-bold tracking-wider ${
+                            confVal >= 80 ? "text-mint-400" : confVal >= 50 ? "text-amber-warn" : "text-muted-foreground"
+                          }`}>
+                            {confVal > 0 ? `${confVal}%` : "low"}
                           </span>
                         </div>
-                        <p className="text-sm text-foreground">{String(value)}</p>
+                        <p className="text-sm">{String(value)}</p>
                       </div>
-                    ))}
+                    );
+                  })}
+                </div>
+
+                {processedDocument.warnings && processedDocument.warnings.length > 0 && (
+                  <div className="mt-3 rounded-md tag-urgent p-3 text-sm">
+                    {processedDocument.warnings.join(" ")}
                   </div>
+                )}
 
-                  {processedDocument.warnings && processedDocument.warnings.length > 0 && (
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                      {processedDocument.warnings.join(" ")}
+                {processedDocument.documentFacts && processedDocument.documentFacts.length > 0 && (
+                  <div className="mt-4 rounded-md bg-bio-base/50 border border-trust-500/20 p-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="eyebrow">STRUCTURED FACTS · PROVENANCE</span>
                     </div>
-                  )}
-
-                  {processedDocument.documentFacts && processedDocument.documentFacts.length > 0 && (
-                    <div className="rounded-lg border border-border bg-muted/30 p-3">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Structured facts with provenance</p>
-                      <div className="space-y-3">
-                        {processedDocument.documentFacts.map((fact) => (
-                          <div key={`${fact.documentId ?? processedDocument.id}-${fact.field}-${fact.value}`} className="rounded-lg bg-background p-3 border border-border">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1">
-                                <p className="text-xs font-semibold text-muted-foreground">{fact.field}</p>
-                                <p className="mt-1 text-sm text-foreground">{fact.value}</p>
-                                <div className="mt-2 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
-                                  <span>Confidence: {(fact.confidence ?? 0).toFixed(2)}</span>
-                                  <span>Source: {fact.source}</span>
-                                  <span>Status: {fact.status ?? (fact.verified ? "confirmed" : "pending")}</span>
-                                </div>
-                                {fact.evidence && <p className="mt-2 text-[10px] text-muted-foreground">Evidence: {fact.evidence}</p>}
+                    <div className="space-y-2">
+                      {processedDocument.documentFacts.map((fact) => (
+                        <div key={`${fact.documentId ?? processedDocument.id}-${fact.field}-${fact.value}`} className="rounded-md bg-bio-surface/60 border border-trust-500/20 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <span className="data-figure text-[10px] font-bold tracking-widest text-muted-foreground">
+                                {fact.field}
+                              </span>
+                              <p className="mt-1 text-sm">{fact.value}</p>
+                              <div className="mt-2 flex flex-wrap gap-2 data-figure text-[10px] text-muted-foreground tracking-wider">
+                                <span>CONF · {(fact.confidence ?? 0).toFixed(2)}</span>
+                                <span className="text-trust-500/30">·</span>
+                                <span>SRC · {fact.source}</span>
+                                <span className="text-trust-500/30">·</span>
+                                <span>STATUS · {(fact.status ?? (fact.verified ? "confirmed" : "pending")).toUpperCase()}</span>
                               </div>
-                              <div className="flex flex-col gap-2">
-                                <Button size="sm" variant="outline" onClick={() => applyFactReview(fact.field, "confirm")}>Confirm</Button>
-                                <Button size="sm" variant="outline" onClick={() => {
-                                  setEditingFactKey(fact.field);
-                                  setDraftFactValue(fact.editedValue ?? fact.value);
-                                }}>Edit</Button>
-                                <Button size="sm" variant="outline" onClick={() => applyFactReview(fact.field, "reject")}>Reject</Button>
-                              </div>
+                              {fact.evidence && <p className="mt-2 data-figure text-[10px] text-muted-foreground">EVIDENCE · {fact.evidence}</p>}
                             </div>
-
-                            {editingFactKey === fact.field && (
-                              <div className="mt-3 flex gap-2">
-                                <Input value={draftFactValue} onChange={(event) => setDraftFactValue(event.target.value)} className="flex-1" />
-                                <Button size="sm" onClick={() => applyFactReview(fact.field, "edit", draftFactValue)}>Save</Button>
-                                <Button size="sm" variant="ghost" onClick={() => { setEditingFactKey(null); setDraftFactValue(""); }}>Cancel</Button>
-                              </div>
-                            )}
+                            <div className="flex flex-col gap-1.5">
+                              <Button size="sm" variant="outline" className="border-mint-500/40 text-mint-400 hover:bg-mint-500/10" onClick={() => applyFactReview(fact.field, "confirm")}>Confirm</Button>
+                              <Button size="sm" variant="outline" className="border-trust-500/30 hover:bg-trust-500/10" onClick={() => {
+                                setEditingFactKey(fact.field);
+                                setDraftFactValue(fact.editedValue ?? fact.value);
+                              }}>Edit</Button>
+                              <Button size="sm" variant="outline" className="border-red-urgent/40 text-red-critical hover:bg-red-urgent/10" onClick={() => applyFactReview(fact.field, "reject")}>Reject</Button>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
-                  {ocrText && (
-                    <div className="rounded-lg border border-border bg-muted p-3">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Raw OCR evidence</p>
-                      <pre className="whitespace-pre-wrap text-xs text-foreground font-mono leading-5">{ocrText}</pre>
+                          {editingFactKey === fact.field && (
+                            <div className="mt-3 flex gap-2">
+                              <Input value={draftFactValue} onChange={(event) => setDraftFactValue(event.target.value)} className="flex-1 bg-bio-base border-trust-500/30" />
+                              <Button size="sm" className="bg-gradient-to-r from-trust-500 to-teal-500 text-white border-0" onClick={() => applyFactReview(fact.field, "edit", draftFactValue)}>Save</Button>
+                              <Button size="sm" variant="ghost" onClick={() => { setEditingFactKey(null); setDraftFactValue(""); }}>Cancel</Button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {processedDocument.error && (
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{processedDocument.error}</div>
-                  )}
-                </CardContent>
-              </Card>
+                {ocrText && (
+                  <div className="mt-3 rounded-md bg-bio-base border border-trust-500/20 p-3">
+                    <span className="data-figure text-[10px] tracking-widest text-muted-foreground block mb-2">
+                      RAW OCR EVIDENCE
+                    </span>
+                    <pre className="whitespace-pre-wrap text-xs text-foreground font-mono leading-5">{ocrText}</pre>
+                  </div>
+                )}
+
+                {processedDocument.error && (
+                  <div className="mt-3 rounded-md tag-critical p-3 text-sm">
+                    {processedDocument.error}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 
           {uploadedDocs.length > 0 && (
-            <Card className="vintage-card">
-              <CardHeader>
-                <CardTitle className="text-sm" >
-                  Uploaded Documents ({uploadedDocs.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
+            <div className="lab-card lab-card-accent p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold tracking-tight-x">Uploaded Documents</h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      {uploadedDocs.length} ON FILE
+                    </span>
+                  </div>
+                </div>
+                <RingProgress
+                  value={uploadedDocs.length * 20}
+                  size={40}
+                  thickness={3}
+                  variant="accent"
+                  showValue={false}
+                />
+              </div>
+              <div className="space-y-2">
                 {uploadedDocs.map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-parchment border border-border">
-                    <FileText className="w-4 h-4 text-vintage-teal flex-shrink-0" />
+                  <div key={doc.id} className="flex items-center gap-3 p-3 rounded-md bg-teal-500/8 border border-teal-500/20">
+                    <FileText className="w-4 h-4 text-teal-400 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground truncate">{doc.fileName || doc.filename}</p>
-                      <p className="text-[10px] text-muted-foreground">{doc.status || "pending"} • {doc.timestamp ? new Date(doc.timestamp).toLocaleString("en-IN") : "just now"}</p>
+                      <p className="text-sm truncate">{doc.fileName || doc.filename}</p>
+                      <p className="data-figure text-[10px] text-muted-foreground tracking-widest mt-0.5">
+                        {(doc.status || "pending").toUpperCase()} · {doc.timestamp ? new Date(doc.timestamp).toLocaleString("en-IN") : "JUST NOW"}
+                      </p>
                     </div>
-                    {doc.status === "completed" ? <Check className="w-4 h-4 text-vintage-green flex-shrink-0" /> : <AlertCircle className="w-4 h-4 text-vintage-red flex-shrink-0" />}
-                    <Button size="sm" variant="ghost" onClick={() => removeDocument(doc.id)}><X className="w-4 h-4" /></Button>
+                    {doc.status === "completed" ? (
+                      <Check className="w-4 h-4 text-mint-400 flex-shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-amber-warn flex-shrink-0" />
+                    )}
+                    <Button size="sm" variant="ghost" onClick={() => removeDocument(doc.id)} className="hover:bg-red-urgent/10">
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </motion.div>
 
         <div className="mt-6 flex items-center justify-between pb-8">
-          <Button variant="outline" onClick={() => navigate("/patient/assessment")}><ArrowLeft className="mr-2 w-4 h-4" />Back</Button>
-          <Button className="bg-vintage-blue hover:bg-vintage-blue/90" onClick={() => { setStep("timeline"); navigate("/patient/timeline"); }}>Continue to Timeline<ArrowRight className="ml-2 w-4 h-4" /></Button>
+          <Button variant="outline" onClick={() => navigate("/patient/assessment")} className="border-trust-500/30 hover:bg-trust-500/10">
+            <ArrowLeft className="mr-2 w-4 h-4" />
+            <span className="data-figure tracking-wider">BACK</span>
+          </Button>
+          <Button
+            className="bg-gradient-to-r from-trust-500 to-teal-500 hover:from-trust-400 hover:to-teal-400 text-white border-0 glow-primary"
+            onClick={() => { setStep("timeline"); navigate("/patient/timeline"); }}
+          >
+            Continue to Timeline
+            <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
         </div>
       </div>
     </div>

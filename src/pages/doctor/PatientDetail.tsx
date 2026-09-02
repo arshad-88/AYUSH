@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { usePatientStore } from "@/store/patientStore";
 import { Header } from "@/components/shared/Header";
@@ -28,18 +27,44 @@ import {
   ChevronRight,
   Shield,
   Activity,
+  Dna,
+  Pill,
+  Mic,
+  Lock,
+  Cpu,
 } from "lucide-react";
+import {
+  BiomarkerBar,
+  EkgWave,
+  RadialGauge,
+  RingProgress,
+  StatusBar,
+  AreaSparkline,
+} from "@/components/scientific";
 
-const socratesLabels: Record<string, string> = {
-  site: "Site",
-  onset: "Onset",
-  character: "Character",
-  radiation: "Radiation",
-  associatedSymptoms: "Associated Symptoms",
-  timing: "Timing",
-  exacerbatingFactors: "Exacerbating Factors",
-  relievingFactors: "Relieving Factors",
-  severity: "Severity",
+const socratesLabels: Record<string, { label: string; description: string }> = {
+  site: { label: "S · Site", description: "Where the pain is located" },
+  onset: { label: "O · Onset", description: "When it started" },
+  character: { label: "C · Character", description: "How it feels" },
+  radiation: { label: "R · Radiation", description: "Where it spreads" },
+  associatedSymptoms: { label: "A · Associated", description: "Other symptoms" },
+  timing: { label: "T · Timing", description: "Pattern over time" },
+  exacerbatingFactors: { label: "E · Exacerbating", description: "What makes it worse" },
+  relievingFactors: { label: "R · Relieving", description: "What makes it better" },
+  severity: { label: "S · Severity", description: "Intensity /10" },
+};
+
+const ayushLabels: Record<string, { label: string; sanskrit: string }> = {
+  prakriti: { label: "Body Constitution", sanskrit: "Prakriti" },
+  vikriti: { label: "Current Imbalance", sanskrit: "Vikriti" },
+  sara: { label: "Tissue Quality", sanskrit: "Sara" },
+  samhanana: { label: "Body Build", sanskrit: "Samhanana" },
+  pramana: { label: "Proportions", sanskrit: "Pramana" },
+  satmya: { label: "Adaptability", sanskrit: "Satmya" },
+  satva: { label: "Mental Strength", sanskrit: "Satva" },
+  aharaShakti: { label: "Digestive Power", sanskrit: "Ahara Shakti" },
+  vyayamaShakti: { label: "Exercise Capacity", sanskrit: "Vyayama Shakti" },
+  vaya: { label: "Age", sanskrit: "Vaya" },
 };
 
 export default function PatientDetail() {
@@ -55,7 +80,6 @@ export default function PatientDetail() {
     socrates,
     ayush,
     documents,
-    timeline,
     triage,
     verification,
     setVerification,
@@ -81,7 +105,12 @@ export default function PatientDetail() {
   const handleOverride = () => {
     setVerification({
       status: "edited",
-      overridePriority: triage?.priority === "urgent" ? "priority" : triage?.priority === "priority" ? "routine" : "priority",
+      overridePriority:
+        triage?.priority === "urgent"
+          ? "priority"
+          : triage?.priority === "priority"
+            ? "routine"
+            : "priority",
       overrideReason,
       verifiedAt: new Date().toISOString(),
     });
@@ -115,356 +144,531 @@ export default function PatientDetail() {
 
   const answeredSOCRATES = Object.entries(socrates).filter(([_, v]) => v);
   const answeredAYUSH = Object.entries(ayush).filter(([_, v]) => v);
+  const socratesCompletion = Math.round((answeredSOCRATES.length / 9) * 100);
+  const ayushCompletion = Math.round((answeredAYUSH.length / 10) * 100);
+  const dataCompletion = Math.round(
+    ((answeredSOCRATES.length / 9) * 0.5 + (answeredAYUSH.length / 10) * 0.3 + (documents.length > 0 ? 0.2 : 0)) * 100,
+  );
 
   return (
-    <div className="min-h-screen vintage-texture">
+    <div className="min-h-screen relative">
+      <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
       <Header />
-      <div className="max-w-5xl mx-auto px-4 py-8">
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          {/* Back Button */}
+          {/* Back nav */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/doctor/dashboard")}
+            className="hover:bg-trust-500/10"
           >
             <ArrowLeft className="mr-2 w-4 h-4" />
-            Back to Queue
+            <span className="data-figure tracking-wider">BACK TO CONSOLE</span>
           </Button>
 
-          {/* Patient Header */}
-          <Card className="vintage-card">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-vintage-blue/10 flex items-center justify-center">
-                    <User className="w-7 h-7 text-vintage-blue" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-foreground" >
-                      {name || "Patient"}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                      {age ? `${age}y, ${gender}` : ""} • {language} • ABHA: {abhaId || "—"}
-                    </p>
-                    <p className="text-sm text-foreground mt-1 font-medium">
-                      Chief Complaint: {chiefComplaint || "—"}
-                    </p>
-                  </div>
+          {/* Patient identity */}
+          <div className="lab-card lab-card-accent p-6 sm:p-8">
+            <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-start">
+              <div className="flex items-start gap-4">
+                <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-trust-500/30 to-teal-500/30 border border-trust-500/40 flex items-center justify-center">
+                  <User className="w-7 h-7 text-trust-300" strokeWidth={1.6} />
+                  <span className="absolute inset-0 rounded-xl border-2 border-trust-400/40 animate-data-pulse" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <PriorityBadge priority={(triage?.priority as any) || "routine"} />
-                  <div className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase ${
-                    verification.status === "confirmed"
-                      ? "bg-routine-green/10 text-routine-green"
-                      : verification.status === "edited"
-                        ? "bg-priority-amber/10 text-priority-amber"
-                        : verification.status === "rejected"
-                          ? "bg-urgent-red/10 text-urgent-red"
-                          : "bg-muted text-muted-foreground"
-                  }`}>
-                    {verification.status}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="data-figure text-[10px] tracking-widest text-mint-400">● ACTIVE</span>
+                    <span className="text-trust-500/30">·</span>
+                    <span className="data-figure text-[10px] tracking-widest text-muted-foreground">PT-2418-A</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight-x mb-2">
+                    {name || "Patient"}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                    <span className="data-figure">{age}y · {gender}</span>
+                    <span className="text-trust-500/30">·</span>
+                    <span className="flex items-center gap-1.5">
+                      <Activity className="w-3 h-3" />
+                      <span className="data-figure tracking-wider">{language}</span>
+                    </span>
+                    <span className="text-trust-500/30">·</span>
+                    <span className="flex items-center gap-1.5">
+                      <Dna className="w-3 h-3" />
+                      <span className="data-figure tracking-wider">ABHA · {abhaId || "—"}</span>
+                    </span>
+                  </div>
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-trust-500/10 border border-trust-500/30">
+                    <Mic className="w-3 h-3 text-trust-300" />
+                    <span className="data-figure text-[10px] tracking-widest text-trust-300">CHIEF COMPLAINT</span>
+                    <span className="text-sm font-medium">{chiefComplaint || "—"}</span>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* SOCRATES */}
-              <Card className="vintage-card">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-vintage-teal" />
-                    <CardTitle className="text-sm" >
-                      SOCRATES Assessment
-                    </CardTitle>
-                    <span className="text-[10px] text-muted-foreground">
-                      ({answeredSOCRATES.length}/9)
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {Object.entries(socratesLabels).map(([key, label]) => {
-                    const value = socrates[key as keyof typeof socrates];
-                    return (
-                      <div key={key} className={`flex items-start gap-3 p-2.5 rounded-lg ${value ? "bg-parchment" : "bg-muted/30"}`}>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground w-20 flex-shrink-0 pt-0.5">
-                          {label}
-                        </span>
-                        <span className={`text-sm ${value ? "text-foreground" : "text-muted-foreground italic"}`}>
-                          {value || "Not documented"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-
-              {/* AYUSH */}
-              <Card className="vintage-card">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Leaf className="w-4 h-4 text-vintage-gold" />
-                    <CardTitle className="text-sm" >
-                      AYUSH Assessment ({answeredAYUSH.length}/10)
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(ayush).map(([key, value]: [string, string]) => (
-                      <div key={key} className={`p-2 rounded-lg text-xs ${value ? "bg-vintage-gold/5" : "bg-muted/30"}`}>
-                        <p className="font-semibold text-muted-foreground capitalize">
-                          {key.replace(/([A-Z])/g, " $1").trim()}
-                        </p>
-                        <p className={`mt-0.5 ${value ? "text-foreground" : "text-muted-foreground italic"}`}>
-                          {value || "—"}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col gap-3 items-end">
+                <PriorityBadge priority={(triage?.priority as any) || "routine"} size="lg" />
+                <div className={`px-3 py-1.5 rounded-md data-figure text-[10px] tracking-widest ${
+                  verification.status === "confirmed"
+                    ? "tag-stable"
+                    : verification.status === "edited"
+                      ? "tag-urgent"
+                      : verification.status === "rejected"
+                        ? "tag-critical"
+                        : "tag-neutral"
+                }`}>
+                  {verification.status.toUpperCase()}
+                </div>
+              </div>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Explainable AI */}
-              {triage && (
-                <Card className="vintage-card border-vintage-blue/20">
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-vintage-blue" />
-                      <CardTitle className="text-sm" >
-                        Why This Priority?
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {triage.reasons.map((reason: string, i: number) => (
-                      <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-vintage-blue/5">
-                        <CheckCircle className="w-4 h-4 text-vintage-blue mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-foreground">{reason}</span>
-                      </div>
-                    ))}
-                    <div className="pt-2 border-t border-border">
-                      <p className="text-xs text-muted-foreground">
-                        AI Confidence: <span className="font-bold text-vintage-blue">{Math.round(triage.confidence * 100)}% — Simulated</span>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Documents */}
-              <Card className="vintage-card">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-vintage-teal" />
-                    <CardTitle className="text-sm" >
-                      Documents ({documents.length})
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {documents.length > 0 ? (
-                    documents.map((doc) => (
-                      <div key={doc.id} className="p-3 rounded-lg bg-parchment border border-border">
-                        <p className="text-sm font-medium text-foreground">{doc.fileName}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {doc.extractedData.date} — {doc.extractedData.medication}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground italic">No documents uploaded</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Missing Information */}
-              <Card className="vintage-card border-priority-amber/20">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-priority-amber" />
-                    <CardTitle className="text-sm" >
-                      Missing Information
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  {answeredSOCRATES.length < 5 && (
-                    <p className="text-xs text-foreground flex items-start gap-1">
-                      <ChevronRight className="w-3 h-3 text-priority-amber mt-0.5" />
-                      SOCRATES assessment incomplete ({answeredSOCRATES.length}/9)
-                    </p>
-                  )}
-                  {documents.length === 0 && (
-                    <p className="text-xs text-foreground flex items-start gap-1">
-                      <ChevronRight className="w-3 h-3 text-priority-amber mt-0.5" />
-                      No medical documents uploaded
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+            <div className="mt-6 pt-6 border-t border-trust-500/15">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <BiomarkerBar value={socratesCompletion} label="SOCRATES" unit="%" variant="primary" size="sm" />
+                <BiomarkerBar value={ayushCompletion} label="AYUSH" unit="%" variant="accent" size="sm" />
+                <BiomarkerBar value={documents.length > 0 ? 100 : 0} label="DOCS" unit="%" variant="warning" size="sm" />
+                <BiomarkerBar value={dataCompletion} label="OVERALL" unit="%" variant="stable" size="sm" />
+              </div>
             </div>
           </div>
 
-          {/* Doctor Verification Actions */}
-          <Card className="vintage-card border-vintage-blue/30">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" >
-                  Doctor Verification
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {verification.status !== "pending" && verification.verifiedAt && (
-                <div className="p-3 rounded-lg bg-routine-green/5 border border-routine-green/20">
-                  <p className="text-sm font-medium text-routine-green">
-                    ✓ Doctor {verification.status === "confirmed" ? "Confirmed" : verification.status === "edited" ? "Edited & Confirmed" : "Rejected"} — {new Date(verification.verifiedAt).toLocaleString("en-IN")}
-                  </p>
-                  {verification.overrideReason && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Reason: {verification.overrideReason}
-                    </p>
-                  )}
+          {/* Two column body */}
+          <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
+            {/* LEFT: SOCRATES + AYUSH */}
+            <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="lab-card lab-card-accent p-6"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                      <Brain className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold tracking-tight-x">SOCRATES Assessment</h3>
+                      <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                        ADAPTIVE INTERVIEW · {answeredSOCRATES.length}/9
+                      </span>
+                    </div>
+                  </div>
+                  <RingProgress value={socratesCompletion} size={48} thickness={4} variant="primary" />
                 </div>
-              )}
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {Object.entries(socratesLabels).map(([key, info]) => {
+                    const value = socrates[key as keyof typeof socrates];
+                    return (
+                      <div
+                        key={key}
+                        className={`p-3 rounded-md border transition-all ${
+                          value
+                            ? "bg-trust-500/8 border-trust-500/30"
+                            : "bg-bio-base/30 border-bio-border/40"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="data-figure text-[10px] tracking-widest text-trust-300">
+                            {info.label}
+                          </span>
+                          {value && <CheckCircle className="w-3 h-3 text-mint-400" />}
+                        </div>
+                        <p className={`text-xs ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>
+                          {value || "Not yet captured"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-5 pt-4 border-t border-trust-500/15">
+                  <EkgWave height={32} showAxis variant="accent" />
+                </div>
+              </motion.div>
 
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  className="bg-routine-green hover:bg-routine-green/90 text-white"
-                  onClick={() => handleVerify("confirmed")}
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Confirm Case Sheet
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-priority-amber text-priority-amber hover:bg-priority-amber/5"
-                  onClick={() => handleVerify("edited")}
-                >
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit / Override
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-urgent-red text-urgent-red hover:bg-urgent-red/5"
-                  onClick={() => handleVerify("rejected")}
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Reject
-                </Button>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="lab-card lab-card-accent p-6"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                      <Leaf className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold tracking-tight-x">AYUSH Assessment</h3>
+                      <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                        DASHVIDHA PARIKSHA · {answeredAYUSH.length}/10
+                      </span>
+                    </div>
+                  </div>
+                  <RingProgress value={ayushCompletion} size={48} thickness={4} variant="accent" />
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {Object.entries(ayushLabels).map(([key, info]) => {
+                    const value = (ayush as any)[key];
+                    return (
+                      <div
+                        key={key}
+                        className={`p-3 rounded-md border ${
+                          value
+                            ? "bg-teal-500/8 border-teal-500/30"
+                            : "bg-bio-base/30 border-bio-border/40"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="data-figure text-[10px] tracking-widest text-teal-400">
+                            {info.sanskrit}
+                          </span>
+                          {value && <CheckCircle className="w-3 h-3 text-mint-400" />}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">{info.label}</p>
+                        <p className={`text-xs mt-1 ${value ? "text-foreground" : "text-muted-foreground/50 italic"}`}>
+                          {value || "—"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </div>
 
-              {showOverrideForm && (
+            {/* RIGHT: AI explainability, docs, missing */}
+            <div className="space-y-6">
+              {triage && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="space-y-3"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="lab-card lab-card-accent p-6"
                 >
-                  <Textarea
-                    placeholder="Enter reason for override..."
-                    value={overrideReason}
-                    onChange={(e) => setOverrideReason(e.target.value)}
-                    className="min-h-[80px]"
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-priority-amber hover:bg-priority-amber/90 text-white"
-                      onClick={handleOverride}
-                      disabled={!overrideReason}
-                    >
-                      Submit Override
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowOverrideForm(false)}
-                    >
-                      Cancel
-                    </Button>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                      <Cpu className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold tracking-tight-x">Why This Priority?</h3>
+                      <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                        EXPLAINABLE AI
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-around mb-5">
+                    <RadialGauge
+                      value={Math.round(triage.confidence * 100)}
+                      label="CONFIDENCE"
+                      unit="%"
+                      variant="primary"
+                      size={110}
+                      thickness={8}
+                    />
+                    <div className="text-center">
+                      <div className="data-figure text-[10px] text-muted-foreground tracking-widest">CONFIDENCE</div>
+                      <div className="data-figure text-3xl font-bold text-trust-300 mt-1">
+                        {Math.round(triage.confidence * 100)}<span className="text-base">%</span>
+                      </div>
+                      <div className="data-figure text-[9px] text-amber-warn tracking-widest mt-1">SIMULATED</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {triage.reasons.map((reason: string, i: number) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 p-2.5 rounded-md bg-trust-500/8 border border-trust-500/20"
+                      >
+                        <span className="data-figure text-[9px] text-trust-300 mt-0.5">
+                          F{(i + 1).toString().padStart(2, "0")}
+                        </span>
+                        <span className="text-xs text-foreground leading-relaxed">{reason}</span>
+                      </div>
+                    ))}
                   </div>
                 </motion.div>
               )}
-            </CardContent>
-          </Card>
 
-          {/* FHIR / ABDM Integration */}
-          <Card className="vintage-card">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Link2 className="w-4 h-4 text-vintage-teal" />
-                <CardTitle className="text-sm" >
-                  FHIR / ABDM Integration Demo
-                </CardTitle>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="lab-card lab-card-accent p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold tracking-tight-x">Documents</h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      OCR EXTRACTED · {documents.length}
+                    </span>
+                  </div>
+                </div>
+                {documents.length > 0 ? (
+                  <div className="space-y-2">
+                    {documents.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="p-3 rounded-md bg-teal-500/8 border border-teal-500/20 hover-lift"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-semibold">{doc.fileName}</p>
+                          <Pill className="w-3.5 h-3.5 text-teal-400" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 data-figure text-[10px] text-muted-foreground">
+                          <span>DATE · {doc.extractedData.date || "—"}</span>
+                          <span>RX · {doc.extractedData.medication || "—"}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs italic">No documents uploaded</p>
+                  </div>
+                )}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="lab-card lab-card-accent p-6 border-amber-warn/30"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-9 h-9 rounded-lg bg-amber-warn/15 border border-amber-warn/30 flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4 text-amber-warn" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold tracking-tight-x">Missing Information</h3>
+                    <span className="data-figure text-[10px] text-amber-warn tracking-widest">CLINICAL GAPS</span>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  {answeredSOCRATES.length < 5 && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <ChevronRight className="w-3 h-3 text-amber-warn" />
+                      <span>SOCRATES incomplete ({answeredSOCRATES.length}/9)</span>
+                    </div>
+                  )}
+                  {answeredAYUSH.length < 5 && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <ChevronRight className="w-3 h-3 text-amber-warn" />
+                      <span>AYUSH incomplete ({answeredAYUSH.length}/10)</span>
+                    </div>
+                  )}
+                  {documents.length === 0 && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <ChevronRight className="w-3 h-3 text-amber-warn" />
+                      <span>No medical documents uploaded</span>
+                    </div>
+                  )}
+                  {answeredSOCRATES.length >= 5 && answeredAYUSH.length >= 5 && documents.length > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-mint-400">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>All clinical data complete</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Verification panel */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="lab-card lab-card-accent p-6"
+          >
+            <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
+                </div>
+                <div>
+                  <h3 className="font-bold tracking-tight-x">Doctor Verification</h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    AI-ASSISTED · DOCTOR DECIDES
+                  </span>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-wrap gap-3">
+              <StatusBar latency="38ms" sessionId="DOCTOR-CONSOLE" />
+            </div>
+
+            {verification.status !== "pending" && verification.verifiedAt && (
+              <div className="mb-4 p-3 rounded-md bg-mint-500/10 border border-mint-500/30">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-mint-400" />
+                  <p className="text-sm font-semibold">
+                    {verification.status === "confirmed"
+                      ? "Confirmed"
+                      : verification.status === "edited"
+                        ? "Edited & Confirmed"
+                        : "Rejected"}{" "}
+                    · {new Date(verification.verifiedAt).toLocaleString("en-IN")}
+                  </p>
+                </div>
+                {verification.overrideReason && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Reason: {verification.overrideReason}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-3">
+              <Button
+                className="bg-gradient-to-r from-mint-500 to-teal-500 hover:from-mint-400 hover:to-teal-400 text-bio-base border-0"
+                onClick={() => handleVerify("confirmed")}
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Confirm Case Sheet
+              </Button>
+              <Button
+                variant="outline"
+                className="border-amber-warn/40 text-amber-warn hover:bg-amber-warn/10"
+                onClick={() => handleVerify("edited")}
+              >
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit / Override
+              </Button>
+              <Button
+                variant="outline"
+                className="border-red-urgent/40 text-red-critical hover:bg-red-urgent/10"
+                onClick={() => handleVerify("rejected")}
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Reject
+              </Button>
+            </div>
+
+            {showOverrideForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="mt-4 space-y-3"
+              >
+                <div>
+                  <span className="eyebrow block mb-2">OVERRIDE REASON</span>
+                  <Textarea
+                    placeholder="Document your clinical reasoning for the override..."
+                    value={overrideReason}
+                    onChange={(e) => setOverrideReason(e.target.value)}
+                    className="min-h-[100px] bg-bio-base/50 border-trust-500/30"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="bg-amber-warn hover:bg-amber-warn/90 text-bio-base border-0"
+                    onClick={handleOverride}
+                    disabled={!overrideReason}
+                  >
+                    <Lock className="w-3.5 h-3.5 mr-1" />
+                    Submit Override · Audit Logged
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowOverrideForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* FHIR / ABDM */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="lab-card lab-card-accent p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                <Link2 className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+              </div>
+              <div>
+                <h3 className="font-bold tracking-tight-x">FHIR / ABDM Integration</h3>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  HL7 FHIR R4 · ABDM-READY
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-trust-500/30 hover:bg-trust-500/10"
+                onClick={handleGenerateFHIR}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                ) : (
+                  <FileText className="w-3 h-3 mr-1" />
+                )}
+                Generate FHIR Bundle
+              </Button>
+              {fhirBundle && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleGenerateFHIR}
+                  className="border-teal-500/30 hover:bg-teal-500/10"
+                  onClick={handleABDMPush}
                   disabled={isGenerating}
                 >
-                  {isGenerating ? (
-                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
-                  ) : (
-                    <FileText className="w-3 h-3 mr-1" />
-                  )}
-                  Generate FHIR Bundle
+                  <Link2 className="w-3 h-3 mr-1" />
+                  Push to ABHA PHR
                 </Button>
-                {fhirBundle && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleABDMPush}
-                    disabled={isGenerating}
-                  >
-                    <Link2 className="w-3 h-3 mr-1" />
-                    Push to ABHA PHR
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/integration")}
-                >
-                  View Full FHIR Demo
-                  <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-trust-500/30 hover:bg-trust-500/10"
+                onClick={() => navigate("/integration")}
+              >
+                Full FHIR Demo
+                <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </div>
+
+            {fhirBundle && (
+              <div className="mt-4 p-3 rounded-md bg-bio-base border border-trust-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="data-figure text-[10px] tracking-widest text-trust-300">
+                    FHIR R4 BUNDLE · {fhirBundle.entry.length} RESOURCES
+                  </p>
+                  <span className="data-figure text-[9px] text-mint-400 tracking-widest">● READY</span>
+                </div>
+                <pre className="data-figure text-[10px] text-muted-foreground overflow-auto max-h-40">
+                  {JSON.stringify(fhirBundle, null, 2).slice(0, 800)}...
+                </pre>
               </div>
+            )}
 
-              {fhirBundle && (
-                <div className="p-3 rounded-lg bg-parchment border border-border">
-                  <p className="text-xs font-bold text-foreground mb-2">FHIR R4 Bundle — {fhirBundle.entry.length} resources</p>
-                  <pre className="text-[10px] text-muted-foreground overflow-auto max-h-40 font-mono">
-                    {JSON.stringify(fhirBundle, null, 2).slice(0, 800)}...
-                  </pre>
-                </div>
-              )}
+            {abdmResult && (
+              <div className="mt-3 p-3 rounded-md tag-info text-xs">
+                {abdmResult}
+              </div>
+            )}
 
-              {abdmResult && (
-                <div className="p-3 rounded-lg bg-vintage-teal/5 border border-vintage-teal/20">
-                  <p className="text-xs text-vintage-teal font-medium">{abdmResult}</p>
-                </div>
-              )}
-
+            <div className="mt-4">
               <DisclaimerBanner type="simulated" />
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </div>

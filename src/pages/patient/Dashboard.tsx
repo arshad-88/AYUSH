@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
 import { Header } from "@/components/shared/Header";
+import { PriorityBadge } from "@/components/shared/PriorityBadge";
 import { getAuthService } from "@/services/auth";
 import {
   Plus,
@@ -18,7 +18,16 @@ import {
   CheckCircle,
   Activity,
   Loader2,
+  Activity as Pulse,
+  User,
+  Dna,
 } from "lucide-react";
+import {
+  BiomarkerBar,
+  EkgWave,
+  RingProgress,
+  StatusBar,
+} from "@/components/scientific";
 
 type DashboardView = "overview" | "consultation-detail";
 
@@ -53,7 +62,6 @@ export default function PatientDashboard() {
     navigate("/patient/consent");
   };
 
-  // Demo previous consultations
   const demoConsultations = [
     {
       id: "cons-001",
@@ -89,30 +97,27 @@ export default function PatientDashboard() {
     ...demoConsultations,
   ];
 
-  // ════════════════════════════════════════════════════════════════
-  // CONSULTATION DETAIL VIEW
-  // ════════════════════════════════════════════════════════════════
-
   if (view === "consultation-detail" && selectedConsultation) {
     const consultation = previousConsultations.find((c) => c.id === selectedConsultation);
     if (!consultation) return null;
 
     return (
-      <div className="min-h-screen vintage-texture">
+      <div className="min-h-screen relative">
+        <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
         <Header />
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="relative max-w-3xl mx-auto px-4 py-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
           >
-            <Card className="vintage-card mb-6">
-              <CardHeader className="flex flex-row items-start justify-between">
+            <div className="lab-card lab-card-accent mb-6 p-6">
+              <div className="flex items-start justify-between mb-4">
                 <div>
-                  <CardTitle >
-                    Consultation Details
-                  </CardTitle>
-                  <CardDescription>{consultation.date}</CardDescription>
+                  <h2 className="text-xl font-bold tracking-tight-x">Consultation Details</h2>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    {consultation.date}
+                  </span>
                 </div>
                 <Button
                   variant="ghost"
@@ -121,350 +126,314 @@ export default function PatientDashboard() {
                     setView("overview");
                     setSelectedConsultation(null);
                   }}
+                  className="hover:bg-trust-500/10"
                 >
                   ← Back to Dashboard
                 </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-parchment">
-                    <p className="text-xs text-muted-foreground mb-1">Chief Complaint</p>
-                    <p className="text-sm font-semibold text-foreground">{consultation.chiefComplaint}</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-parchment">
-                    <p className="text-xs text-muted-foreground mb-1">Priority Level</p>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          consultation.priority === "routine"
-                            ? "bg-green-500"
-                            : consultation.priority === "priority"
-                              ? "bg-amber-500"
-                              : "bg-red-500"
-                        }`}
-                      />
-                      <p className="text-sm font-semibold text-foreground capitalize">
-                        {consultation.priority}
-                      </p>
-                    </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 rounded-md bg-trust-500/8 border border-trust-500/25">
+                  <span className="data-figure text-[10px] tracking-widest text-trust-300">CHIEF COMPLAINT</span>
+                  <p className="text-sm font-semibold mt-1">{consultation.chiefComplaint}</p>
+                </div>
+                <div className="p-3 rounded-md bg-bio-base/50 border border-trust-500/20">
+                  <span className="data-figure text-[10px] tracking-widest text-muted-foreground">PRIORITY</span>
+                  <div className="mt-1">
+                    <PriorityBadge priority={consultation.priority} size="sm" />
                   </div>
                 </div>
-
-                <div className="p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-950/20 dark:border-green-900/40">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-green-700 dark:text-green-300">Consultation Status</p>
-                      <p className="text-[10px] text-green-700 dark:text-green-300 mt-0.5">
-                        {consultation.status}
-                      </p>
-                    </div>
-                  </div>
+              </div>
+              <div className="mt-4 p-3 rounded-md tag-stable">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  <span className="data-figure text-xs tracking-widest">CONSULTATION STATUS · {consultation.status.toUpperCase()}</span>
                 </div>
-
-                {consultation.casesheetAvailable && (
-                  <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/40">
-                    <div className="flex items-start gap-2">
-                      <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Case Sheet Available</p>
-                        <p className="text-[10px] text-blue-700 dark:text-blue-300 mt-0.5">
-                          A structured case sheet from this consultation is available.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t border-border">
-                  <Button
-                    className="w-full bg-vintage-blue hover:bg-vintage-blue/90"
-                    onClick={() => {
-                      setView("overview");
-                      setSelectedConsultation(null);
-                    }}
-                  >
-                    Back to Dashboard
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>
     );
   }
 
-  // ════════════════════════════════════════════════════════════════
-  // MAIN DASHBOARD VIEW
-  // ════════════════════════════════════════════════════════════════
-
   return (
-    <div className="min-h-screen vintage-texture">
+    <div className="min-h-screen relative">
+      <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
       <Header />
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="relative max-w-4xl mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* HEADER WITH PATIENT INFO & PRIMARY CTA */}
-          <div className="mb-8">
-            <Card className="vintage-card">
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between gap-6">
-                  <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-foreground mb-1" >
-                      Welcome, {name || "Patient"}
-                    </h1>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4" />
-                        <span>MediKiosk ID: <span className="font-mono font-semibold text-foreground">{currentPatient?.patientId || "—"}</span></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        <span>
-                          ABHA Status:{" "}
-                          <span className="font-semibold text-foreground">
-                            {abhaId ? "Linked" : "Not linked"}
-                          </span>
-                          {abhaId && ` (${abhaId.substring(0, 8)}...)`}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4" />
-                        <span>
-                          Authentication:{" "}
-                          <span className="font-semibold text-green-600 dark:text-green-400">Verified (Demo)</span>
-                        </span>
-                      </div>
-                    </div>
+          {/* Hero identity card */}
+          <div className="lab-card lab-card-accent p-6 sm:p-8 mb-8 relative overflow-hidden">
+            <div className="absolute top-3 right-3">
+              <StatusBar latency="42ms" sessionId="PT-VIEW" />
+            </div>
+            <div className="flex items-start justify-between gap-6 flex-wrap">
+              <div className="flex items-center gap-4">
+                <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-trust-500/30 to-teal-500/30 border border-trust-500/40 flex items-center justify-center">
+                  <User className="w-7 h-7 text-trust-300" strokeWidth={1.6} />
+                  <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-mint-500 ring-2 ring-bio-base animate-data-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="data-figure text-[10px] tracking-widest text-mint-400">● AUTHENTICATED</span>
+                    <span className="text-trust-500/30">·</span>
+                    <span className="data-figure text-[10px] tracking-widest text-muted-foreground">PATIENT VIEW</span>
                   </div>
-
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      onClick={handleStartAssessment}
-                      className="h-12 px-6 bg-vintage-blue hover:bg-vintage-blue/90 text-white"
-                    >
-                      <Plus className="w-5 h-5 mr-2" />
-                      Start New Assessment
-                    </Button>
-                    <Button
-                      onClick={handleLogout}
-                      variant="outline"
-                      className="h-12 px-6"
-                      disabled={isLoggingOut}
-                    >
-                      {isLoggingOut ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>
-                          <LogOut className="w-4 h-4 mr-2" />
-                          Logout
-                        </>
-                      )}
-                    </Button>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight-x">
+                    Welcome, {name || "Patient"}
+                  </h1>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Pulse className="w-3 h-3 text-trust-400" />
+                      <span className="data-figure tracking-wider">ID · {currentPatient?.patientId || "—"}</span>
+                    </span>
+                    <span className="text-trust-500/30">·</span>
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="w-3 h-3 text-teal-400" />
+                      <span className="data-figure tracking-wider">ABHA · {abhaId ? `${abhaId.substring(0, 8)}…` : "NOT LINKED"}</span>
+                    </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Button
+                  onClick={handleStartAssessment}
+                  className="h-12 px-6 bg-gradient-to-r from-trust-500 to-teal-500 hover:from-trust-400 hover:to-teal-400 text-white border-0 glow-primary"
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  Start New Assessment
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="h-12 px-6 border-trust-500/30 hover:bg-trust-500/10"
+                  disabled={isLoggingOut}
+                >
+                  {isLoggingOut ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-trust-500/15">
+              <EkgWave height={32} showAxis={false} variant="primary" />
+            </div>
           </div>
 
-          {/* PREVIOUS CONSULTATIONS */}
+          {/* Previous consultations */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" >
-              <Calendar className="w-5 h-5 inline mr-2" />
-              Previous Consultations
-            </h2>
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-4 h-4 text-trust-400" />
+              <h2 className="text-lg font-bold tracking-tight-x">Previous Consultations</h2>
+              <span className="ml-auto data-figure text-[10px] text-muted-foreground tracking-widest">
+                {previousConsultations.length} ON FILE
+              </span>
+            </div>
             {previousConsultations.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {previousConsultations.map((consultation) => (
-                  <button
+                  <motion.button
                     key={consultation.id}
+                    whileHover={{ x: 4 }}
                     onClick={() => {
                       setSelectedConsultation(consultation.id);
                       setView("consultation-detail");
                     }}
-                    className="w-full p-4 rounded-lg border-2 border-border hover:border-vintage-blue hover:bg-vintage-blue/5 transition-all text-left group"
+                    className="w-full p-4 rounded-md border border-trust-500/15 bg-bio-surface/40 hover:bg-bio-elevated/60 hover:border-trust-500/30 transition-all text-left group"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-sm font-semibold text-foreground">{consultation.chiefComplaint}</span>
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              consultation.priority === "routine"
-                                ? "bg-green-500"
-                                : consultation.priority === "priority"
-                                  ? "bg-amber-500"
-                                  : "bg-red-500"
-                            }`}
-                          />
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <p className="text-sm font-semibold truncate">{consultation.chiefComplaint}</p>
+                          <PriorityBadge priority={consultation.priority} size="sm" />
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-3 data-figure text-[10px] text-muted-foreground tracking-widest">
                           <span>{consultation.date}</span>
-                          <span className="capitalize">{consultation.priority}</span>
-                          <span>{consultation.status}</span>
+                          <span className="text-trust-500/30">·</span>
+                          <span>{consultation.status.toUpperCase()}</span>
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-vintage-blue" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-trust-400 group-hover:translate-x-1 transition-all" />
                     </div>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             ) : (
-              <Card className="vintage-card">
-                <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground text-center">
-                    No previous consultations found.
-                  </p>
-                </CardContent>
-              </Card>
+              <div className="lab-card lab-card-accent p-6 text-center text-muted-foreground">
+                <p className="text-sm">No previous consultations found.</p>
+              </div>
             )}
           </div>
 
-          {/* CLINICAL HISTORY */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" >
-              <FileText className="w-5 h-5 inline mr-2" />
-              Clinical History
-            </h2>
-            <Card className="vintage-card">
-              <CardContent className="pt-6 space-y-3">
-                {clinicalState?.chiefComplaint ? (
-                  <>
-                    <div className="p-3 rounded-lg bg-parchment">
-                      <p className="text-xs text-muted-foreground mb-1">Chief Complaint</p>
-                      <p className="text-sm font-semibold text-foreground">{clinicalState.chiefComplaint}</p>
+          {/* Two-column quick view */}
+          <div className="grid sm:grid-cols-2 gap-6 mb-8">
+            <div className="lab-card lab-card-accent p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold tracking-tight-x">Clinical History</h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    ACTIVE RECORD
+                  </span>
+                </div>
+              </div>
+              {clinicalState?.chiefComplaint ? (
+                <div className="p-3 rounded-md bg-trust-500/8 border border-trust-500/25">
+                  <span className="data-figure text-[10px] tracking-widest text-trust-300">
+                    CHIEF COMPLAINT
+                  </span>
+                  <p className="text-sm font-semibold mt-1">{clinicalState.chiefComplaint}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No active clinical history.</p>
+              )}
+            </div>
+
+            <div className="lab-card lab-card-accent p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                  <Leaf className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold tracking-tight-x">AYUSH Profile</h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    {ayush && (ayush.prakriti || ayush.vikriti) ? "COMPLETED" : "PENDING"}
+                  </span>
+                </div>
+                {ayush && (ayush.prakriti || ayush.vikriti) && (
+                  <RingProgress
+                    value={Object.values(ayush).filter((v) => v && v.trim()).length * 10}
+                    size={36}
+                    thickness={3}
+                    variant="accent"
+                    showValue={false}
+                  />
+                )}
+              </div>
+              {ayush && (ayush.prakriti || ayush.vikriti) ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {ayush.prakriti && (
+                    <div className="p-2.5 rounded-md bg-teal-500/8 border border-teal-500/20">
+                      <span className="data-figure text-[10px] tracking-widest text-teal-400">PRAKRITI</span>
+                      <p className="text-sm font-semibold mt-0.5">{ayush.prakriti}</p>
                     </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center">No clinical history available.</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  )}
+                  {ayush.vikriti && (
+                    <div className="p-2.5 rounded-md bg-teal-500/8 border border-teal-500/20">
+                      <span className="data-figure text-[10px] tracking-widest text-teal-400">VIKRITI</span>
+                      <p className="text-sm font-semibold mt-0.5">{ayush.vikriti}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">AYUSH assessment not completed.</p>
+              )}
+            </div>
 
-          {/* AYUSH PROFILE */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" >
-              <Leaf className="w-5 h-5 inline mr-2" />
-              AYUSH Profile
-            </h2>
-            <Card className="vintage-card">
-              <CardContent className="pt-6">
-                {ayush && (ayush.prakriti || ayush.vikriti) ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {ayush.prakriti && (
-                      <div className="p-3 rounded-lg bg-parchment">
-                        <p className="text-xs text-muted-foreground mb-1">Prakriti</p>
-                        <p className="text-sm font-semibold text-foreground">{ayush.prakriti}</p>
-                      </div>
-                    )}
-                    {ayush.vikriti && (
-                      <div className="p-3 rounded-lg bg-parchment">
-                        <p className="text-xs text-muted-foreground mb-1">Vikriti</p>
-                        <p className="text-sm font-semibold text-foreground">{ayush.vikriti}</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center">
-                    AYUSH assessment not completed.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+            <div className="lab-card lab-card-accent p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-amber-warn/15 border border-amber-warn/30 flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-amber-warn" strokeWidth={1.6} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold tracking-tight-x">Documents</h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    OCR · EXTRACTED
+                  </span>
+                </div>
+              </div>
+              {documents && documents.length > 0 ? (
+                <BiomarkerBar
+                  value={documents.length}
+                  max={10}
+                  label="ON FILE"
+                  unit="docs"
+                  variant="warning"
+                  showValue
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">No documents uploaded.</p>
+              )}
+            </div>
 
-          {/* DOCUMENTS */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" >
-              <FileText className="w-5 h-5 inline mr-2" />
-              Documents
-            </h2>
-            <Card className="vintage-card">
-              <CardContent className="pt-6">
-                {documents && documents.length > 0 ? (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-semibold text-foreground">{documents.length}</span> document{documents.length > 1 ? "s" : ""} on file
-                    </p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center">
-                    No documents uploaded.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* TIMELINE */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" >
-              <Calendar className="w-5 h-5 inline mr-2" />
-              Clinical Timeline
-            </h2>
-            <Card className="vintage-card">
-              <CardContent className="pt-6">
-                {timeline && timeline.length > 0 ? (
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {timeline.map((event: any, i: number) => (
-                      <div key={i} className="flex gap-3 pb-3 border-b border-border last:border-0">
-                        <div className="w-2 h-2 rounded-full bg-vintage-blue mt-1.5 flex-shrink-0" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">{event.date}</p>
-                          <p className="text-sm font-semibold text-foreground">{event.title}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{event.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center">
-                    No timeline events available.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* TRIAGE */}
-          {triage && (
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-foreground mb-4" >
-                <AlertTriangle className="w-5 h-5 inline mr-2" />
-                Triage Result
-              </h2>
-              <Card className={`vintage-card border-l-4 ${
+            {triage && (
+              <div className={`lab-card lab-card-accent p-5 ${
                 triage.priority === "urgent"
-                  ? "border-l-red-500"
+                  ? "border-red-urgent/40"
                   : triage.priority === "priority"
-                    ? "border-l-amber-500"
-                    : "border-l-green-500"
+                    ? "border-amber-warn/40"
+                    : "border-mint-500/40"
               }`}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-3 h-3 rounded-full ${
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${
+                    triage.priority === "urgent"
+                      ? "bg-red-urgent/15 border-red-urgent/30"
+                      : triage.priority === "priority"
+                        ? "bg-amber-warn/15 border-amber-warn/30"
+                        : "bg-mint-500/15 border-mint-500/30"
+                  }`}>
+                    <AlertTriangle className={`w-4 h-4 ${
                       triage.priority === "urgent"
-                        ? "bg-red-500"
+                        ? "text-red-critical"
                         : triage.priority === "priority"
-                          ? "bg-amber-500"
-                          : "bg-green-500"
-                    }`} />
-                    <p className="text-sm font-semibold text-foreground capitalize">{triage.priority}</p>
+                          ? "text-amber-warn"
+                          : "text-mint-400"
+                    }`} strokeWidth={1.6} />
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex-1">
+                    <h3 className="font-bold tracking-tight-x">Triage Result</h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      AI-ASSISTED
+                    </span>
+                  </div>
+                  <PriorityBadge priority={triage.priority} size="sm" />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Will be confirmed by the consulting physician.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Timeline */}
+          {timeline && timeline.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Dna className="w-4 h-4 text-trust-400" />
+                <h2 className="text-lg font-bold tracking-tight-x">Clinical Timeline</h2>
+              </div>
+              <div className="lab-card lab-card-accent p-5 space-y-3 max-h-72 overflow-y-auto">
+                {timeline.map((event: any, i: number) => (
+                  <div key={i} className="flex gap-3 pb-3 border-b border-trust-500/10 last:border-0">
+                    <div className="w-2 h-2 rounded-full bg-trust-400 mt-1.5 flex-shrink-0 ring-4 ring-trust-400/15" />
+                    <div className="flex-1">
+                      <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                        {event.date}
+                      </span>
+                      <p className="text-sm font-semibold tracking-tight-x mt-0.5">{event.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{event.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* FOOTER INFO */}
-          <div className="text-center text-xs text-muted-foreground py-4">
-            <p>MediKiosk Patient Portal — Demo Mode</p>
-            <p>All data is session-only and not persisted.</p>
+          <div className="text-center data-figure text-[10px] text-muted-foreground tracking-widest py-4">
+            MEDIKIOSK PATIENT PORTAL · DEMO MODE · SESSION-ONLY
           </div>
         </motion.div>
       </div>

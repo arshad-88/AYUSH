@@ -10,7 +10,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePatientStore } from "@/store/patientStore";
 import { Header } from "@/components/shared/Header";
@@ -35,7 +34,17 @@ import {
   User,
   Loader2,
   FileText,
+  Activity,
+  Brain,
+  CheckCircle,
 } from "lucide-react";
+import {
+  BiomarkerBar,
+  EkgWave,
+  RingProgress,
+  StatusBar,
+  DNASpinner,
+} from "@/components/scientific";
 
 // Constants
 const socratesOrder = [
@@ -314,10 +323,11 @@ export default function TouchModeInterview() {
     (field) => socrates[field as keyof typeof socrates]
   ).length;
 
-  return (
-    <div className="min-h-screen vintage-texture flex flex-col">
+return (
+    <div className="min-h-screen flex flex-col relative">
+      <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
       <Header />
-      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 py-4">
+      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 py-4 relative">
         {/* Progress */}
         <div className="mb-4">
           <StepProgress
@@ -330,33 +340,31 @@ export default function TouchModeInterview() {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-0">
           {/* Left: AI Conversation */}
           <div className="lg:col-span-3 flex flex-col">
-            <Card className="vintage-card flex-1 flex flex-col min-h-[500px]">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-vintage-blue/10 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-vintage-blue" />
-                    </div>
-                    <div>
-                      <CardTitle
-                        className="text-sm"
-                        
-                      >
-                        Clinical Interview
-                      </CardTitle>
-                      <p className="text-[10px] text-muted-foreground">
-                        Touch Mode Interview
-                      </p>
-                    </div>
+            <div className="lab-card lab-card-accent flex-1 flex flex-col min-h-[500px]">
+              <div className="p-5 pb-3 border-b border-trust-500/15 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                    <Brain className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
                   </div>
-                  <span className="text-xs font-semibold text-vintage-blue">
-                    {answeredCount}/9 SOCRATES
+                  <div>
+                    <h3 className="text-sm font-bold tracking-tight-x">
+                      Clinical Interview
+                    </h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      TOUCH MODE · ADAPTIVE SOCRATES
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <StatusBar latency="42ms" />
+                  <span className="data-figure text-sm font-semibold text-trust-300">
+                    {answeredCount}/9
                   </span>
                 </div>
-              </CardHeader>
+              </div>
 
               {/* Messages with Speaker Buttons */}
-              <CardContent className="flex-1 overflow-y-auto px-4 pb-2 space-y-3">
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
                 <AnimatePresence>
                   {messages.map((msg) => (
                     <motion.div
@@ -368,23 +376,22 @@ export default function TouchModeInterview() {
                       }`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-xl px-4 py-3 ${
+                        className={`max-w-[80%] rounded-lg px-4 py-3 border ${
                           msg.role === "ai"
-                            ? "bg-vintage-blue/5 border border-vintage-blue/10 text-foreground"
-                            : "bg-vintage-teal/10 border border-vintage-teal/20 text-foreground"
+                            ? "bg-trust-500/8 border-trust-500/25 text-foreground"
+                            : "bg-teal-500/10 border-teal-500/30 text-foreground"
                         }`}
                       >
-                        <div className="flex items-start gap-2">
+                        <div className="flex items-start gap-2.5">
                           {msg.role === "ai" ? (
-                            <Bot className="w-4 h-4 text-vintage-blue mt-0.5 flex-shrink-0" />
+                            <Bot className="w-4 h-4 text-trust-300 mt-0.5 flex-shrink-0" strokeWidth={1.6} />
                           ) : (
-                            <User className="w-4 h-4 text-vintage-teal mt-0.5 flex-shrink-0" />
+                            <User className="w-4 h-4 text-teal-400 mt-0.5 flex-shrink-0" strokeWidth={1.6} />
                           )}
                           <div className="flex-1">
                             <p className="text-sm leading-relaxed">
                               {msg.content}
                             </p>
-                            {/* Speaker button for AI questions */}
                             {msg.role === "ai" && msg.content && (
                               <div className="mt-2">
                                 <SpeakerButton
@@ -400,10 +407,10 @@ export default function TouchModeInterview() {
                   ))}
                 </AnimatePresence>
                 <div ref={messagesEndRef} />
-              </CardContent>
+              </div>
 
               {/* Input */}
-              <div className="p-4 border-t border-border">
+              <div className="p-4 border-t border-trust-500/15">
                 <form onSubmit={handleTextSubmit} className="flex items-center gap-2">
                   <Button
                     type="button"
@@ -411,8 +418,8 @@ export default function TouchModeInterview() {
                     size="icon"
                     className={`flex-shrink-0 ${
                       isListening
-                        ? "bg-urgent-red hover:bg-urgent-red/90 animate-pulse"
-                        : ""
+                        ? "bg-red-urgent hover:bg-red-urgent/90 border-0"
+                        : "border-trust-500/30 hover:bg-trust-500/10"
                     }`}
                     onClick={handleVoiceInput}
                     disabled={isProcessing}
@@ -432,16 +439,16 @@ export default function TouchModeInterview() {
                       language
                     )}
                     disabled={isProcessing}
-                    className="flex-1"
+                    className="flex-1 bg-bio-base/50 border-trust-500/30 focus:border-trust-400"
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="flex-shrink-0 bg-vintage-blue hover:bg-vintage-blue/90"
+                    className="flex-shrink-0 bg-gradient-to-r from-trust-500 to-teal-500 hover:from-trust-400 hover:to-teal-400 text-white border-0"
                     disabled={!inputValue.trim() || isProcessing}
                   >
                     {isProcessing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <DNASpinner size="sm" />
                     ) : (
                       <Send className="w-4 h-4" />
                     )}
@@ -450,56 +457,57 @@ export default function TouchModeInterview() {
 
                 {isListening && (
                   <div className="mt-3 flex items-center justify-center gap-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
+                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
                       <div
                         key={i}
-                        className="w-1 bg-vintage-blue rounded-full animate-pulse"
-                        style={{ animationDelay: `${i * 0.1}s` }}
+                        className="w-1 bg-trust-400 rounded-full waveform-bar"
+                        style={{ animationDelay: `${i * 0.12}s`, height: 4 + (i % 3) * 4 }}
                       />
                     ))}
-                    <span className="text-xs text-muted-foreground ml-2">
-                      Listening...
+                    <span className="data-figure text-[10px] text-trust-300 ml-2 tracking-widest">
+                      LISTENING · ASR ACTIVE
                     </span>
                   </div>
                 )}
+
+                <div className="mt-3">
+                  <EkgWave height={20} showAxis={false} variant="primary" />
+                </div>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Right: Case Information Panel */}
           <div className="lg:col-span-2 flex flex-col">
-            <Card className="vintage-card flex-1 flex flex-col">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-vintage-teal/10 flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-vintage-teal" />
-                  </div>
-                  <div>
-                    <CardTitle
-                      className="text-sm"
-                      
-                    >
-                      Live Case Information
-                    </CardTitle>
-                    <p className="text-[10px] text-muted-foreground">
-                      Extracted in real-time
-                    </p>
-                  </div>
+            <div className="lab-card lab-card-accent flex-1 flex flex-col">
+              <div className="p-5 pb-3 border-b border-trust-500/15 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
                 </div>
-              </CardHeader>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold tracking-tight-x">
+                    Live Case Stream
+                  </h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    EXTRACTED · REAL-TIME
+                  </span>
+                </div>
+                <RingProgress value={Math.round((answeredCount / 9) * 100)} size={36} thickness={3} variant="accent" showValue={false} />
+              </div>
 
-              <CardContent className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
-                {/* Chief Complaint */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
                 {chiefComplaint && (
-                  <div className="p-3 rounded-lg bg-vintage-blue/5 border border-vintage-blue/10">
-                    <p className="text-[10px] font-bold text-vintage-blue uppercase tracking-wider mb-1">
-                      Chief Complaint
-                    </p>
+                  <div className="p-3 rounded-md bg-trust-500/10 border border-trust-500/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="data-figure text-[10px] tracking-widest text-trust-300">
+                        CHIEF COMPLAINT
+                      </span>
+                      <CheckCircle className="w-3 h-3 text-mint-400" />
+                    </div>
                     <p className="text-sm text-foreground">{chiefComplaint}</p>
                   </div>
                 )}
 
-                {/* SOCRATES fields */}
                 {socratesOrder.map((field) => {
                   const value =
                     socrates[field as keyof typeof socrates];
@@ -507,28 +515,25 @@ export default function TouchModeInterview() {
                   return (
                     <div
                       key={field}
-                      className={`p-3 rounded-lg border transition-all ${
+                      className={`p-3 rounded-md border transition-all ${
                         value
-                          ? "bg-vintage-teal/5 border-vintage-teal/20"
+                          ? "bg-teal-500/8 border-teal-500/25"
                           : isActive
-                            ? "bg-vintage-gold/5 border-vintage-gold/20 animate-pulse"
-                            : "bg-muted/50 border-border"
+                            ? "bg-amber-warn/10 border-amber-warn/40"
+                            : "bg-bio-base/40 border-bio-border/40"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <span className="data-figure text-[10px] tracking-widest text-muted-foreground">
                           {getFieldLabel(field, language)}
-                        </p>
-                        {value && (
-                          <span className="text-[10px] text-vintage-green font-semibold">
-                            ✓
-                          </span>
-                        )}
+                        </span>
+                        {value && <CheckCircle className="w-3 h-3 text-mint-400" />}
+                        {isActive && <span className="w-2 h-2 rounded-full bg-amber-warn animate-data-pulse" />}
                       </div>
                       {value ? (
                         <p className="text-sm text-foreground">{value}</p>
                       ) : (
-                        <p className="text-xs text-muted-foreground italic">
+                        <p className="text-xs text-muted-foreground/60 italic">
                           {isActive
                             ? language === "Hindi"
                               ? "उत्तर की प्रतीक्षा है..."
@@ -542,29 +547,23 @@ export default function TouchModeInterview() {
                   );
                 })}
 
-                {/* Completeness indicator */}
-                <div className="p-3 rounded-lg bg-muted">
+                <div className="p-3 rounded-md bg-bio-base/60 border border-trust-500/15">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-foreground">
-                      SOCRATES Completeness
-                    </p>
-                    <p className="text-xs font-bold text-vintage-blue">
+                    <span className="eyebrow">SOCRATES COMPLETENESS</span>
+                    <span className="data-figure text-sm font-bold text-trust-300">
                       {answeredCount}/9
-                    </p>
+                    </span>
                   </div>
-                  <div className="w-full h-2 bg-border rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-vintage-blue to-vintage-teal rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${(answeredCount / 9) * 100}%`,
-                      }}
-                      transition={{ duration: 0.5 }}
-                    />
-                  </div>
+                  <BiomarkerBar
+                    value={answeredCount}
+                    max={9}
+                    variant="accent"
+                    size="sm"
+                    showValue={false}
+                  />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -573,14 +572,15 @@ export default function TouchModeInterview() {
           <Button
             variant="outline"
             onClick={() => navigate("/patient/dashboard")}
+            className="border-trust-500/30 hover:bg-trust-500/10"
           >
             <ArrowLeft className="mr-2 w-4 h-4" />
-            Back
+            <span className="data-figure tracking-wider">BACK</span>
           </Button>
 
           {phase === "complete" && (
             <Button
-              className="bg-vintage-blue hover:bg-vintage-blue/90"
+              className="bg-gradient-to-r from-trust-500 to-teal-500 hover:from-trust-400 hover:to-teal-400 text-white border-0 glow-primary"
               onClick={() => {
                 setStep("ayush");
                 navigate("/patient/assessment");

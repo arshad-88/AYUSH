@@ -13,7 +13,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
@@ -27,8 +26,17 @@ import {
   Touchpad,
   AlertCircle,
   ArrowLeft,
-  Loader2,
+  Activity,
+  Mic,
+  Brain,
+  CheckCircle,
 } from "lucide-react";
+import {
+  BiomarkerBar,
+  EkgWave,
+  RingProgress,
+  StatusBar,
+} from "@/components/scientific";
 
 interface ChatMessage {
   id: string;
@@ -312,9 +320,10 @@ export default function VoiceModeInterface() {
   ).length;
 
   return (
-    <div className="min-h-screen vintage-texture flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
       <Header />
-      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 py-4">
+      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 py-4 relative">
         {/* Progress */}
         <div className="mb-4">
           <StepProgress
@@ -327,27 +336,48 @@ export default function VoiceModeInterface() {
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-0">
           {/* Left: Voice Interaction */}
           <div className="lg:col-span-3 flex flex-col">
-            <Card className="vintage-card flex-1 flex flex-col min-h-[600px]">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg" >
-                    Voice Interview
-                  </CardTitle>
-                  <span className="text-xs font-semibold text-vintage-blue">
-                    {answeredCount}/9 SOCRATES
+            <div className="lab-card lab-card-accent flex-1 flex flex-col min-h-[600px]">
+              <div className="p-5 pb-3 border-b border-trust-500/15 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                    <Mic className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold tracking-tight-x">
+                      Voice Interview
+                    </h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      HANDS-FREE · ASR + TTS
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <StatusBar latency="38ms" />
+                  <span className="data-figure text-sm font-semibold text-trust-300">
+                    {answeredCount}/9
                   </span>
                 </div>
-              </CardHeader>
+              </div>
 
-              <CardContent className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 flex flex-col">
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 flex flex-col">
                 {/* Voice Orb - Main Interface */}
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center relative">
                   <VoiceOrb
                     state={voiceState}
                     isActive={voiceState !== "IDLE" && voiceState !== "COMPLETED"}
                     interimTranscript={interimTranscript}
                   />
                 </div>
+
+                {/* Live transcript */}
+                {interimTranscript && (
+                  <div className="text-center">
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest mr-2">
+                      PARTIAL
+                    </span>
+                    <span className="text-sm text-trust-300 italic">{interimTranscript}…</span>
+                  </div>
+                )}
 
                 {/* Messages */}
                 <div className="max-h-[200px] overflow-y-auto space-y-2">
@@ -356,10 +386,10 @@ export default function VoiceModeInterface() {
                       key={msg.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`text-sm px-3 py-2 rounded ${
+                      className={`text-sm px-3 py-2 rounded-md border ${
                         msg.role === "ai"
-                          ? "bg-vintage-blue/5 text-foreground"
-                          : "bg-vintage-teal/10 text-foreground text-right"
+                          ? "bg-trust-500/8 border-trust-500/20 text-foreground"
+                          : "bg-teal-500/10 border-teal-500/25 text-foreground text-right"
                       }`}
                     >
                       {msg.content}
@@ -368,6 +398,9 @@ export default function VoiceModeInterface() {
                   <div ref={messagesEndRef} />
                 </div>
 
+                {/* EKG pulse */}
+                <EkgWave height={24} showAxis={false} variant="accent" />
+
                 {/* Error Display */}
                 <AnimatePresence>
                   {errorMessage && (
@@ -375,18 +408,18 @@ export default function VoiceModeInterface() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 flex items-start gap-3"
+                      className="tag-critical rounded-md px-4 py-3 flex items-start gap-3"
                     >
-                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-red-800">
+                        <p className="text-sm font-medium">
                           {errorMessage}
                         </p>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setErrorMessage("")}
-                          className="mt-2 text-red-700 hover:text-red-800"
+                          className="mt-2"
                         >
                           Dismiss
                         </Button>
@@ -396,11 +429,11 @@ export default function VoiceModeInterface() {
                 </AnimatePresence>
 
                 {/* Controls */}
-                <div className="flex gap-2 pt-4 border-t border-border">
+                <div className="flex gap-2 pt-4 border-t border-trust-500/15">
                   <Button
                     variant="outline"
                     onClick={switchToTouchMode}
-                    className="flex-1"
+                    className="flex-1 border-trust-500/30 hover:bg-trust-500/10"
                   >
                     <Touchpad className="w-4 h-4 mr-2" />
                     Switch to Touch
@@ -408,46 +441,66 @@ export default function VoiceModeInterface() {
                   <Button
                     variant="ghost"
                     onClick={handleExit}
+                    className="hover:bg-trust-500/10"
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Exit
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Right: SOCRATES Panel */}
           <div className="lg:col-span-2 flex flex-col">
-            <Card className="vintage-card flex-1 flex flex-col">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm" >
-                  Live SOCRATES
-                </CardTitle>
-              </CardHeader>
+            <div className="lab-card lab-card-accent flex-1 flex flex-col">
+              <div className="p-5 pb-3 border-b border-trust-500/15 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/30 flex items-center justify-center">
+                  <Brain className="w-4 h-4 text-teal-400" strokeWidth={1.6} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-bold tracking-tight-x">
+                    Live SOCRATES
+                  </h3>
+                  <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                    REAL-TIME EXTRACTION
+                  </span>
+                </div>
+                <RingProgress
+                  value={Math.round((answeredCount / 9) * 100)}
+                  size={36}
+                  thickness={3}
+                  variant="primary"
+                  showValue={false}
+                />
+              </div>
 
-              <CardContent className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
-                {/* Chief Complaint */}
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
                 {chiefComplaint && (
-                  <div className="p-3 rounded-lg bg-vintage-blue/5 border border-vintage-blue/10">
-                    <p className="text-[10px] font-bold text-vintage-blue uppercase">
-                      Complaint
-                    </p>
-                    <p className="text-sm text-foreground mt-1">{chiefComplaint}</p>
+                  <div className="p-3 rounded-md bg-trust-500/10 border border-trust-500/30">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="data-figure text-[10px] tracking-widest text-trust-300">
+                        CHIEF COMPLAINT
+                      </span>
+                      <CheckCircle className="w-3 h-3 text-mint-400" />
+                    </div>
+                    <p className="text-sm text-foreground">{chiefComplaint}</p>
                   </div>
                 )}
 
-                {/* SOCRATES Fields */}
                 {socratesOrder.map((field) => {
                   const value = clinicalState[field as keyof ClinicalState];
                   if (!value) return null;
 
                   return (
-                    <div key={field} className="p-2 rounded-lg bg-muted/30">
-                      <p className="text-[10px] font-semibold text-muted-foreground uppercase">
-                        {socratesLabels[field] || field}
-                      </p>
-                      <p className="text-sm text-foreground mt-1">
+                    <div key={field} className="p-2.5 rounded-md bg-teal-500/8 border border-teal-500/20">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="data-figure text-[10px] tracking-widest text-muted-foreground">
+                          {socratesLabels[field] || field}
+                        </span>
+                        <CheckCircle className="w-3 h-3 text-mint-400" />
+                      </div>
+                      <p className="text-sm text-foreground">
                         {Array.isArray(value) ? value.join(", ") : String(value)}
                       </p>
                     </div>
@@ -456,11 +509,27 @@ export default function VoiceModeInterface() {
 
                 {answeredCount === 0 && (
                   <div className="text-center text-muted-foreground text-sm py-4">
-                    Responses will appear here...
+                    Responses will appear here…
                   </div>
                 )}
-              </CardContent>
-            </Card>
+
+                <div className="p-3 rounded-md bg-bio-base/60 border border-trust-500/15 mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="eyebrow">SOCRATES COMPLETENESS</span>
+                    <span className="data-figure text-sm font-bold text-trust-300">
+                      {answeredCount}/9
+                    </span>
+                  </div>
+                  <BiomarkerBar
+                    value={answeredCount}
+                    max={9}
+                    variant="primary"
+                    size="sm"
+                    showValue={false}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

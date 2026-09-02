@@ -4,28 +4,32 @@ import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
 interface PriorityBadgeProps {
   priority: "routine" | "priority" | "urgent";
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 const config = {
   routine: {
     label: "Routine",
+    code: "P3",
     icon: CheckCircle,
-    className: "bg-routine-green/10 text-routine-green border-routine-green/20",
+    className: "tag-stable",
   },
   priority: {
     label: "Priority",
+    code: "P2",
     icon: Clock,
-    className: "bg-priority-amber/10 text-priority-amber border-priority-amber/20",
+    className: "tag-urgent",
   },
   urgent: {
     label: "Urgent",
+    code: "P1",
     icon: AlertTriangle,
-    className: "bg-urgent-red/10 text-urgent-red border-urgent-red/20",
+    className: "tag-critical",
   },
 };
 
 const sizeConfig = {
-  sm: "px-2 py-0.5 text-[10px] gap-1",
+  sm: "px-2 py-0.5 text-[10px] gap-1.5",
   md: "px-2.5 py-1 text-xs gap-1.5",
   lg: "px-3 py-1.5 text-sm gap-2",
 };
@@ -36,17 +40,19 @@ const iconSize = {
   lg: "w-4 h-4",
 };
 
-export function PriorityBadge({ priority, size = "md" }: PriorityBadgeProps) {
-  const { label, icon: Icon, className } = config[priority];
+export function PriorityBadge({ priority, size = "md", className }: PriorityBadgeProps) {
+  const { label, code, icon: Icon, className: tagClass } = config[priority];
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full font-semibold border uppercase tracking-wide",
-        className,
-        sizeConfig[size]
+        "inline-flex items-center rounded-md font-semibold border data-figure tracking-wider",
+        tagClass,
+        sizeConfig[size],
+        className
       )}
     >
+      <span className="opacity-70 text-[9px] mr-0.5">{code}</span>
       <Icon className={iconSize[size]} />
       {label}
     </span>

@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
-import { Info, AlertTriangle, Sparkles } from "lucide-react";
+import { Info, AlertTriangle, Sparkles, ShieldCheck } from "lucide-react";
 
 interface DisclaimerBannerProps {
-  type?: "ai-generated" | "simulated" | "warning" | "demo";
+  type?: "ai-generated" | "simulated" | "warning" | "demo" | "verified";
   message?: string;
   className?: string;
 }
@@ -10,27 +10,33 @@ interface DisclaimerBannerProps {
 const config = {
   "ai-generated": {
     icon: Sparkles,
-    label: "AI-GENERATED DRAFT",
+    label: "AI-ASSISTED DRAFT",
     description: "Doctor verification required.",
-    className: "bg-vintage-blue/5 border-vintage-blue/20 text-vintage-blue",
+    className: "tag-info",
   },
   simulated: {
     icon: Info,
-    label: "Demo / Simulated",
+    label: "DEMO / SIMULATED",
     description: "This is a simulated result for demonstration purposes.",
-    className: "bg-vintage-gold/5 border-vintage-gold/20 text-vintage-gold",
+    className: "tag-urgent",
   },
   warning: {
     icon: AlertTriangle,
-    label: "Important Notice",
+    label: "CRITICAL NOTICE",
     description: "This system does not diagnose diseases. Doctor has final clinical decision.",
-    className: "bg-urgent-red/5 border-urgent-red/20 text-urgent-red",
+    className: "tag-critical",
   },
   demo: {
     icon: Info,
-    label: "Demo Data",
+    label: "DEMO DATA",
     description: "All patient information shown is fictional demo data.",
-    className: "bg-muted border-border text-muted-foreground",
+    className: "tag-neutral",
+  },
+  verified: {
+    icon: ShieldCheck,
+    label: "PHYSICIAN VERIFIED",
+    description: "Reviewed and confirmed by a licensed clinician.",
+    className: "tag-stable",
   },
 };
 
@@ -44,15 +50,17 @@ export function DisclaimerBanner({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 px-4 py-3 rounded-lg border",
+        "flex items-start gap-3 px-4 py-3 rounded-md border backdrop-blur-sm",
         configClass,
         className
       )}
     >
       <Icon className="w-4 h-4 mt-0.5 flex-shrink-0" />
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider">{label}</p>
-        <p className="text-xs mt-0.5 opacity-80">
+        <p className="data-figure text-[10px] font-bold uppercase tracking-widest">
+          {label}
+        </p>
+        <p className="text-xs mt-0.5 opacity-85 leading-relaxed">
           {message || description}
         </p>
       </div>

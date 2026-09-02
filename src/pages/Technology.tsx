@@ -1,12 +1,10 @@
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/shared/Header";
 import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
 import {
   ArrowLeft,
-  ArrowRight,
   Activity,
   Users,
   Brain,
@@ -22,13 +20,16 @@ import {
   Cpu,
   Layers,
   Workflow,
+  ArrowRight,
 } from "lucide-react";
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 },
-};
+import {
+  AreaSparkline,
+  BiomarkerBar,
+  ParticleField,
+  RadialGauge,
+  RingProgress,
+  StatusBar,
+} from "@/components/scientific";
 
 const techStack = [
   { name: "React / Vite", category: "Frontend", status: "implemented" as const },
@@ -48,42 +49,83 @@ const techStack = [
 ];
 
 const statusConfig = {
-  implemented: { label: "Implemented", color: "text-vintage-green", bg: "bg-vintage-green/10" },
-  simulated: { label: "Simulated", color: "text-vintage-gold", bg: "bg-vintage-gold/10" },
-  planned: { label: "Planned", color: "text-muted-foreground", bg: "bg-muted" },
+  implemented: { label: "LIVE", variant: "tag-stable" },
+  simulated: { label: "SIMULATED", variant: "tag-urgent" },
+  planned: { label: "PLANNED", variant: "tag-neutral" },
 };
+
+const layers = [
+  {
+    code: "01",
+    title: "Patient Interaction Layer",
+    subtitle: "Kiosk · Mobile · Web",
+    color: "trust",
+    icon: Users,
+    items: [
+      "Patient Check-in",
+      "Language Selection",
+      "Voice/Touch Mode",
+      "SOCRATES Interview",
+      "AYUSH Assessment",
+      "Document Upload",
+      "OCR Extraction",
+      "Medical Timeline",
+      "AI Triage",
+      "Case Sheet",
+    ],
+  },
+  {
+    code: "02",
+    title: "AI Processing Engine",
+    subtitle: "Speech · NLP · Vision",
+    color: "teal",
+    icon: Brain,
+    items: [
+      "Speech Processing (Bhashini)",
+      "NLP & Understanding (LLM)",
+      "Clinical Extraction",
+      "Priority Scoring Engine",
+    ],
+  },
+];
 
 export default function Technology() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen vintage-texture">
+    <div className="min-h-screen relative overflow-hidden">
+      <ParticleField density="low" opacity={0.16} />
+      <div className="absolute inset-0 surface-grid opacity-15 pointer-events-none" />
       <Header />
-      <div className="max-w-6xl mx-auto px-4 py-8">
+
+      <div className="relative max-w-6xl mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="hover:bg-trust-500/10"
+          >
             <ArrowLeft className="mr-2 w-4 h-4" />
-            Back to Home
+            <span className="data-figure tracking-wider">BACK</span>
           </Button>
 
-          {/* Header */}
-          <div className="text-center">
-            <h1
-              className="text-3xl sm:text-4xl font-bold text-foreground"
-              
-            >
-              MediKiosk — Architecture
-            </h1>
-            <p className="text-sm text-muted-foreground mt-2 italic">
-              Capture → Structure → Prioritize → Verify → Integrate
-            </p>
-            <div className="ornamental-divider max-w-xs mx-auto mt-4">
-              <Activity className="w-4 h-4 text-vintage-gold" />
+          <div className="text-center max-w-2xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="w-6 h-px bg-trust-500/50" />
+              <span className="eyebrow">ARCHITECTURE</span>
+              <span className="w-6 h-px bg-trust-500/50" />
             </div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight-x">
+              MediKiosk.AI
+            </h1>
+            <p className="data-figure text-[10px] text-muted-foreground tracking-widest mt-2">
+              CAPTURE · STRUCTURE · PRIORITIZE · VERIFY · INTEGRATE
+            </p>
           </div>
 
           <DisclaimerBanner
@@ -91,268 +133,351 @@ export default function Technology() {
             message="This page clearly separates ACTUAL PROTOTYPE IMPLEMENTATION from INTENDED PRODUCTION INTEGRATION."
           />
 
-          {/* System Status Block */}
-          <Card className="vintage-card bg-vintage-blue/5 border-vintage-blue/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm tracking-wide uppercase" >
-                  System Status
-                </CardTitle>
+          {/* System Status */}
+          <div className="lab-card lab-card-accent p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                {[
-                  { name: "AI Interview", status: "LOCAL / DEMO" },
-                  { name: "Voice ASR", status: "BROWSER / FALLBACK" },
-                  { name: "Voice TTS", status: "BROWSER" },
-                  { name: "OCR", status: "TESSERACT.JS" },
-                  { name: "Triage", status: "LOCAL RULE ENGINE" },
-                  { name: "FHIR", status: "FHIR R4 GENERATED" },
-                  { name: "ABDM", status: "SIMULATED" },
-                  { name: "HIS", status: "INTEGRATION-READY" },
-                ].map((sys) => (
-                  <div key={sys.name} className="flex justify-between items-center py-1 border-b border-vintage-blue/10 last:border-0">
-                    <span className="text-sm font-medium text-foreground">{sys.name}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-vintage-blue/20 text-vintage-blue">
-                      {sys.status}
-                    </span>
-                  </div>
-                ))}
+              <div className="flex-1">
+                <h3 className="font-bold tracking-tight-x">System Status</h3>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  COMPONENT HEALTH · REAL-TIME
+                </span>
               </div>
-            </CardContent>
-          </Card>
+              <StatusBar latency="42ms" sessionId="SYS-STATUS" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+              {[
+                { name: "AI Interview", status: "LOCAL / DEMO", variant: "tag-info" as const },
+                { name: "Voice ASR", status: "BROWSER", variant: "tag-info" as const },
+                { name: "Voice TTS", status: "BROWSER", variant: "tag-info" as const },
+                { name: "OCR Engine", status: "TESSERACT.JS", variant: "tag-stable" as const },
+                { name: "Triage", status: "LOCAL RULE ENGINE", variant: "tag-stable" as const },
+                { name: "FHIR", status: "FHIR R4 GENERATED", variant: "tag-info" as const },
+                { name: "ABDM", status: "SIMULATED", variant: "tag-urgent" as const },
+                { name: "HIS / EMR", status: "INTEGRATION-READY", variant: "tag-info" as const },
+              ].map((sys) => (
+                <div
+                  key={sys.name}
+                  className="flex justify-between items-center py-1.5 border-b border-trust-500/10 last:border-0"
+                >
+                  <span className="text-sm font-medium">{sys.name}</span>
+                  <span
+                    className={`data-figure text-[10px] font-bold px-2 py-0.5 rounded-md border ${sys.variant} tracking-widest`}
+                  >
+                    {sys.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Architecture Diagram */}
-          <Card className="vintage-card overflow-hidden">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" >
-                  System Architecture
-                </CardTitle>
+          <div className="lab-card lab-card-accent p-6 sm:p-8 relative overflow-hidden">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                <Layers className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
               </div>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              {/* Architecture Flow */}
-              <div className="space-y-4">
-                {/* Layer 1: Patient Interaction */}
-                <div className="p-4 rounded-xl border-2 border-vintage-blue/20 bg-vintage-blue/5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Users className="w-5 h-5 text-vintage-blue" />
-                    <h3 className="text-sm font-bold text-vintage-blue uppercase tracking-wider">
-                      01 — Patient Interaction (Kiosk / Mobile)
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {[
-                      "Patient Check-in",
-                      "Language Selection",
-                      "Voice/Touch Mode",
-                      "SOCRATES Interview",
-                      "AYUSH Assessment",
-                    ].map((item) => (
-                      <div key={item} className="p-2 rounded-lg bg-white border border-vintage-blue/10 text-center">
-                        <p className="text-[10px] font-medium text-foreground">{item}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-2">
-                    {[
-                      "Document Upload",
-                      "OCR Extraction",
-                      "Medical Timeline",
-                      "AI Triage",
-                      "Case Sheet",
-                    ].map((item) => (
-                      <div key={item} className="p-2 rounded-lg bg-white border border-vintage-blue/10 text-center">
-                        <p className="text-[10px] font-medium text-foreground">{item}</p>
-                      </div>
-                    ))}
-                  </div>
+              <div>
+                <h3 className="font-bold tracking-tight-x">System Architecture</h3>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  SIX-LAYER FLOW
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Layer 1 */}
+              <div className="p-4 rounded-md border border-trust-500/30 bg-trust-500/5 relative overflow-hidden">
+                <div className="absolute inset-0 surface-grid-fine opacity-30 pointer-events-none" />
+                <div className="relative flex items-center gap-2 mb-3">
+                  <span className="data-figure text-[10px] tracking-widest text-trust-300 px-2 py-0.5 rounded-md bg-trust-500/15 border border-trust-500/30">
+                    L01
+                  </span>
+                  <Users className="w-4 h-4 text-trust-300" />
+                  <h3 className="text-sm font-bold text-trust-300 tracking-tight-x">
+                    Patient Interaction (Kiosk / Mobile)
+                  </h3>
                 </div>
-
-                {/* Arrow */}
-                <div className="flex justify-center">
-                  <div className="w-0.5 h-6 bg-vintage-blue" />
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    "Patient Check-in",
+                    "Language Selection",
+                    "Voice/Touch Mode",
+                    "SOCRATES Interview",
+                    "AYUSH Assessment",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="p-2 rounded-md bg-bio-surface/60 border border-trust-500/20 text-center"
+                    >
+                      <p className="data-figure text-[10px] tracking-wider">{item}</p>
+                    </div>
+                  ))}
                 </div>
-
-                {/* Layer 2: AI Processing */}
-                <div className="p-4 rounded-xl border-2 border-vintage-teal/20 bg-vintage-teal/5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Brain className="w-5 h-5 text-vintage-teal" />
-                    <h3 className="text-sm font-bold text-vintage-teal uppercase tracking-wider">
-                      02 — AI Processing Engine
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      "Speech Processing (Bhashini)",
-                      "NLP & Understanding (LLM)",
-                      "Clinical Extraction",
-                      "Priority Scoring Engine",
-                    ].map((item) => (
-                      <div key={item} className="p-2 rounded-lg bg-white border border-vintage-teal/10 text-center">
-                        <p className="text-[10px] font-medium text-foreground">{item}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="flex justify-center">
-                  <div className="w-0.5 h-6 bg-vintage-teal" />
-                </div>
-
-                {/* Layer 3: Data + Integration + Doctor */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* Data Layer */}
-                  <div className="p-4 rounded-xl border-2 border-vintage-gold/20 bg-vintage-gold/5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Database className="w-5 h-5 text-vintage-gold" />
-                      <h3 className="text-xs font-bold text-vintage-gold uppercase tracking-wider">
-                        03 — Data Layer
-                      </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-2">
+                  {[
+                    "Document Upload",
+                    "OCR Extraction",
+                    "Medical Timeline",
+                    "AI Triage",
+                    "Case Sheet",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="p-2 rounded-md bg-bio-surface/60 border border-trust-500/20 text-center"
+                    >
+                      <p className="data-figure text-[10px] tracking-wider">{item}</p>
                     </div>
-                    <div className="space-y-1.5">
-                      {["Patient Profile", "Clinical Data", "Documents", "Timeline", "Audit Logs"].map((item) => (
-                        <div key={item} className="p-1.5 rounded bg-white border border-vintage-gold/10">
-                          <p className="text-[10px] font-medium text-foreground">{item}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Integration Layer */}
-                  <div className="p-4 rounded-xl border-2 border-vintage-teal/20 bg-vintage-teal/5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Link2 className="w-5 h-5 text-vintage-teal" />
-                      <h3 className="text-xs font-bold text-vintage-teal uppercase tracking-wider">
-                        04 — Integration
-                      </h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {["FHIR R4 Server", "ABDM (ABHA, Health ID)", "HIS / EMR Push", "Notification Service"].map((item) => (
-                        <div key={item} className="p-1.5 rounded bg-white border border-vintage-teal/10">
-                          <p className="text-[10px] font-medium text-foreground">{item}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Doctor Workflow */}
-                  <div className="p-4 rounded-xl border-2 border-vintage-blue/20 bg-vintage-blue/5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Workflow className="w-5 h-5 text-vintage-blue" />
-                      <h3 className="text-xs font-bold text-vintage-blue uppercase tracking-wider">
-                        05 — Doctor Workflow
-                      </h3>
-                    </div>
-                    <div className="space-y-1.5">
-                      {["OPD Queue Dashboard", "Patient Case View", "Explainable AI", "Confirm/Edit/Override"].map((item) => (
-                        <div key={item} className="p-1.5 rounded bg-white border border-vintage-blue/10">
-                          <p className="text-[10px] font-medium text-foreground">{item}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="flex justify-center">
-                  <div className="w-0.5 h-6 bg-border" />
-                </div>
-
-                {/* Layer 4: External Systems */}
-                <div className="p-4 rounded-xl border-2 border-border bg-muted/30">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Globe className="w-5 h-5 text-muted-foreground" />
-                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                      06 — External Systems (Production)
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { name: "Bhashini Platform", icon: Mic },
-                      { name: "AI4Bharat LLMs", icon: Cpu },
-                      { name: "OCR Engine", icon: FileText },
-                      { name: "Hospital HIS/EMR", icon: Server },
-                    ].map((item) => (
-                      <div key={item.name} className="p-2 rounded-lg bg-white border border-border text-center">
-                        <item.icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                        <p className="text-[10px] font-medium text-foreground">{item.name}</p>
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Connector */}
+              <div className="flex justify-center">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="w-px h-6 bg-trust-500/40" />
+                  <ArrowRight className="w-3 h-3 text-trust-500/60 rotate-90" />
+                </div>
+              </div>
+
+              {/* Layer 2 */}
+              <div className="p-4 rounded-md border border-teal-500/30 bg-teal-500/5">
+                <div className="relative flex items-center gap-2 mb-3">
+                  <span className="data-figure text-[10px] tracking-widest text-teal-400 px-2 py-0.5 rounded-md bg-teal-500/15 border border-teal-500/30">
+                    L02
+                  </span>
+                  <Brain className="w-4 h-4 text-teal-400" />
+                  <h3 className="text-sm font-bold text-teal-400 tracking-tight-x">
+                    AI Processing Engine
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    "Speech Processing (Bhashini)",
+                    "NLP & Understanding (LLM)",
+                    "Clinical Extraction",
+                    "Priority Scoring Engine",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="p-2 rounded-md bg-bio-surface/60 border border-teal-500/20 text-center"
+                    >
+                      <p className="data-figure text-[10px] tracking-wider">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <span className="w-px h-6 bg-trust-500/40" />
+              </div>
+
+              {/* Layer 3-5: three-column */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-4 rounded-md border border-amber-warn/30 bg-amber-warn/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="data-figure text-[10px] tracking-widest text-amber-warn px-1.5 py-0.5 rounded-md bg-amber-warn/15 border border-amber-warn/30">
+                      L03
+                    </span>
+                    <Database className="w-4 h-4 text-amber-warn" />
+                    <h3 className="text-xs font-bold text-amber-warn tracking-tight-x">DATA LAYER</h3>
+                  </div>
+                  <div className="space-y-1.5">
+                    {["Patient Profile", "Clinical Data", "Documents", "Timeline", "Audit Logs"].map((item) => (
+                      <div
+                        key={item}
+                        className="p-1.5 rounded-md bg-bio-surface/60 border border-amber-warn/20"
+                      >
+                        <p className="data-figure text-[10px] tracking-wider">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-md border border-teal-500/30 bg-teal-500/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="data-figure text-[10px] tracking-widest text-teal-400 px-1.5 py-0.5 rounded-md bg-teal-500/15 border border-teal-500/30">
+                      L04
+                    </span>
+                    <Link2 className="w-4 h-4 text-teal-400" />
+                    <h3 className="text-xs font-bold text-teal-400 tracking-tight-x">INTEGRATION</h3>
+                  </div>
+                  <div className="space-y-1.5">
+                    {["FHIR R4 Server", "ABDM (ABHA, Health ID)", "HIS / EMR Push", "Notification Service"].map((item) => (
+                      <div
+                        key={item}
+                        className="p-1.5 rounded-md bg-bio-surface/60 border border-teal-500/20"
+                      >
+                        <p className="data-figure text-[10px] tracking-wider">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-md border border-trust-500/30 bg-trust-500/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="data-figure text-[10px] tracking-widest text-trust-300 px-1.5 py-0.5 rounded-md bg-trust-500/15 border border-trust-500/30">
+                      L05
+                    </span>
+                    <Workflow className="w-4 h-4 text-trust-300" />
+                    <h3 className="text-xs font-bold text-trust-300 tracking-tight-x">DOCTOR WORKFLOW</h3>
+                  </div>
+                  <div className="space-y-1.5">
+                    {["OPD Queue Dashboard", "Patient Case View", "Explainable AI", "Confirm/Edit/Override"].map((item) => (
+                      <div
+                        key={item}
+                        className="p-1.5 rounded-md bg-bio-surface/60 border border-trust-500/20"
+                      >
+                        <p className="data-figure text-[10px] tracking-wider">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <span className="w-px h-6 bg-trust-500/40" />
+              </div>
+
+              {/* Layer 6 */}
+              <div className="p-4 rounded-md border border-bio-border bg-bio-base/40">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="data-figure text-[10px] tracking-widest text-muted-foreground px-1.5 py-0.5 rounded-md bg-bio-base border border-bio-border">
+                    L06
+                  </span>
+                  <Globe className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="text-xs font-bold text-muted-foreground tracking-tight-x">EXTERNAL SYSTEMS (PRODUCTION)</h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { name: "Bhashini Platform", icon: Mic },
+                    { name: "AI4Bharat LLMs", icon: Cpu },
+                    { name: "OCR Engine", icon: FileText },
+                    { name: "Hospital HIS/EMR", icon: Server },
+                  ].map((item) => (
+                    <div
+                      key={item.name}
+                      className="p-2 rounded-md bg-bio-surface/40 border border-bio-border/40 text-center"
+                    >
+                      <item.icon className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+                      <p className="data-figure text-[10px] tracking-wider">{item.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Metrics row */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="lab-card lab-card-accent p-5">
+              <RadialGauge
+                value={92}
+                size={120}
+                thickness={9}
+                label="UPTIME"
+                unit="%"
+                variant="stable"
+              />
+              <p className="data-figure text-[10px] text-center text-muted-foreground tracking-widest mt-2">
+                PRODUCTION READINESS
+              </p>
+            </div>
+            <div className="lab-card lab-card-accent p-5">
+              <div className="space-y-3">
+                <BiomarkerBar value={42} label="OCR LATENCY" unit="ms" variant="primary" size="sm" />
+                <BiomarkerBar value={98} label="OCR ACCURACY" unit="%" variant="accent" size="sm" />
+                <BiomarkerBar value={88} label="FIELD EXTRACTION" unit="%" variant="stable" size="sm" />
+              </div>
+              <p className="data-figure text-[10px] text-center text-muted-foreground tracking-widest mt-3">
+                OCR ENGINE METRICS
+              </p>
+            </div>
+            <div className="lab-card lab-card-accent p-5">
+              <p className="eyebrow mb-2">INTAKE · LAST 7 DAYS</p>
+              <AreaSparkline
+                values={[120, 145, 162, 198, 175, 220, 248]}
+                height={60}
+                variant="primary"
+                max={300}
+              />
+              <p className="data-figure text-[10px] text-center text-muted-foreground tracking-widest mt-2">
+                PATIENT THROUGHPUT
+              </p>
+            </div>
+          </div>
 
           {/* Tech Stack */}
-          <Card className="vintage-card">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Code className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" >
-                  Technology Stack
-                </CardTitle>
+          <div className="lab-card lab-card-accent p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-lg bg-trust-500/15 border border-trust-500/30 flex items-center justify-center">
+                <Code className="w-4 h-4 text-trust-300" strokeWidth={1.6} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {techStack.map((tech) => {
-                  const status = statusConfig[tech.status];
-                  return (
-                    <div
-                      key={tech.name}
-                      className="flex items-center justify-between p-3 rounded-lg bg-parchment border border-border"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{tech.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{tech.category}</p>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
-                        {status.label}
-                      </span>
+              <div>
+                <h3 className="font-bold tracking-tight-x">Technology Stack</h3>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  FRONTEND · BACKEND · AI · INTEROP
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {techStack.map((tech) => {
+                const status = statusConfig[tech.status];
+                return (
+                  <div
+                    key={tech.name}
+                    className="flex items-center justify-between p-3 rounded-md bg-bio-base/50 border border-trust-500/15 hover:border-trust-500/30 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium tracking-tight-x">{tech.name}</p>
+                      <p className="data-figure text-[10px] text-muted-foreground tracking-widest">{tech.category}</p>
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                    <span
+                      className={`data-figure text-[10px] font-bold px-2 py-0.5 rounded-md border ${status.variant} tracking-widest`}
+                    >
+                      {status.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Key Benefits */}
-          <Card className="vintage-card">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-vintage-green" />
-                <CardTitle className="text-sm" >
-                  Key Benefits
-                </CardTitle>
+          <div className="lab-card lab-card-accent p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-lg bg-mint-500/15 border border-mint-500/30 flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 text-mint-400" strokeWidth={1.6} />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {[
-                  "Pre-consultation reduces doctor workload",
-                  "Structured, priority-aware case sheets",
-                  "AYUSH + Modern medicine integration",
-                  "Multilingual, inclusive & accessible",
-                  "ABDM/FHIR ready for future integration",
-                  "Explainable AI with doctor override capability",
-                ].map((benefit) => (
-                  <div key={benefit} className="flex items-start gap-2 p-3 rounded-lg bg-vintage-green/5 border border-vintage-green/20">
-                    <CheckCircle className="w-4 h-4 text-vintage-green mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-foreground">{benefit}</p>
-                  </div>
-                ))}
+              <div>
+                <h3 className="font-bold tracking-tight-x">Key Benefits</h3>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  CLINICAL · OPERATIONAL · STRATEGIC
+                </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {[
+                "Pre-consultation reduces doctor workload",
+                "Structured, priority-aware case sheets",
+                "AYUSH + Modern medicine integration",
+                "Multilingual, inclusive & accessible",
+                "ABDM/FHIR ready for future integration",
+                "Explainable AI with doctor override capability",
+              ].map((benefit) => (
+                <div
+                  key={benefit}
+                  className="flex items-start gap-2 p-3 rounded-md bg-mint-500/8 border border-mint-500/25"
+                >
+                  <CheckCircle className="w-4 h-4 text-mint-400 mt-0.5 flex-shrink-0" strokeWidth={2.2} />
+                  <p className="text-sm">{benefit}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          {/* Safety Note */}
           <DisclaimerBanner type="warning" className="mb-8" />
         </motion.div>
       </div>
