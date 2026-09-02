@@ -205,8 +205,8 @@ export default function Timeline() {
           )}
 
           <DisclaimerBanner
-            type="simulated"
-            message="Timeline events are derived from interview data and simulated records."
+            type="info"
+            message="Timeline events are persisted as Convex records and shown here."
           />
         </motion.div>
 
