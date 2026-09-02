@@ -23,6 +23,8 @@ import {
   Inbox,
   Cpu,
   Radio,
+  Sparkles,
+  Plus,
 } from "lucide-react";
 import {
   AreaSparkline,
@@ -31,6 +33,9 @@ import {
   RingProgress,
   StatusBar,
   DNASpinner,
+  EmptyState,
+  AnimatedNumber,
+  MagneticButton,
 } from "@/components/scientific";
 
 type SortBy = "priority" | "waitTime" | "token";
@@ -291,10 +296,48 @@ export default function DoctorDashboard() {
             </div>
             <div className="p-3 sm:p-4">
               {sortedPatients.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <Inbox className="w-12 h-12 mb-3 opacity-30" />
-                  <p className="text-sm font-medium">Queue is empty</p>
-                  <p className="text-xs mt-1">Complete a patient assessment to populate the queue</p>
+                <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center px-6">
+                  <EmptyState variant="queue" />
+                  <div className="mt-6 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-mint-500 animate-blink-soft" />
+                    <span className="data-figure text-[10px] tracking-widest text-mint-400">QUEUE IDLE</span>
+                  </div>
+                  <h3 className="mt-3 text-lg font-bold tracking-tight-x">Awaiting Patient Intake</h3>
+                  <p className="mt-2 text-sm text-muted-foreground max-w-md leading-relaxed">
+                    The OPD queue is empty. Patients completing pre-consultation intake will appear here in real time, prioritized by the rule-based triage engine.
+                  </p>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <MagneticButton
+                      size="md"
+                      variant="primary"
+                      onClick={() => navigate("/patient/login")}
+                      icon={<Plus className="w-4 h-4" />}
+                    >
+                      Start Patient Intake
+                    </MagneticButton>
+                    <MagneticButton
+                      size="md"
+                      variant="ghost"
+                      onClick={() => window.location.reload()}
+                      icon={<RefreshCw className="w-4 h-4" />}
+                    >
+                      Sync Console
+                    </MagneticButton>
+                  </div>
+                  <div className="mt-6 grid grid-cols-3 gap-3 w-full max-w-sm">
+                    <div className="p-2.5 rounded-md bg-bio-base/60 border border-trust-500/15 text-center">
+                      <div className="data-figure text-[9px] tracking-widest text-muted-foreground">CHANNEL</div>
+                      <div className="data-figure-lg text-base font-bold text-mint-400 mt-1">READY</div>
+                    </div>
+                    <div className="p-2.5 rounded-md bg-bio-base/60 border border-trust-500/15 text-center">
+                      <div className="data-figure text-[9px] tracking-widest text-muted-foreground">LATENCY</div>
+                      <div className="data-figure-lg text-base font-bold text-trust-300 mt-1">42ms</div>
+                    </div>
+                    <div className="p-2.5 rounded-md bg-bio-base/60 border border-trust-500/15 text-center">
+                      <div className="data-figure text-[9px] tracking-widest text-muted-foreground">ENGINE</div>
+                      <div className="data-figure-lg text-base font-bold text-teal-400 mt-1">v1.0</div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -339,7 +382,9 @@ function KpiCell({ label, value, suffix, icon: Icon, variant }: {
         <Icon className={`w-4 h-4 ${c.icon}`} strokeWidth={1.6} />
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span className={`data-figure text-3xl font-bold ${c.text}`}>{value}</span>
+        <span className={`data-figure-lg text-3xl font-bold ${c.text}`}>
+          <AnimatedNumber value={value} />
+        </span>
         <span className="data-figure text-[10px] text-muted-foreground tracking-widest">{suffix}</span>
       </div>
     </div>
@@ -358,9 +403,10 @@ function QueueRow({ patient, index, waitTime, onClick }: {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.04 }}
-      whileHover={{ x: 4 }}
+      whileHover={{ x: 4, y: -1 }}
+      whileTap={{ scale: 0.99 }}
       onClick={onClick}
-      className={`w-full p-3 sm:p-4 rounded-lg border text-left transition-all relative overflow-hidden group ${
+      className={`w-full p-3 sm:p-4 rounded-lg border text-left transition-all relative overflow-hidden group cursor-magnetic card-sheen press-shrink ${
         isUrgent
           ? "border-red-urgent/40 bg-red-urgent/5 hover:bg-red-urgent/10"
           : "border-trust-500/15 bg-bio-surface/40 hover:bg-bio-elevated/60 hover:border-trust-500/30"

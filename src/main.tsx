@@ -11,6 +11,7 @@ import "./index.css";
 import { ConvexProvider } from "convex/react";
 import convex from "./lib/convex";
 import { ConvexSync } from "./components/ConvexSync";
+import { CustomCursor, DNASpinner } from "@/components/scientific";
 
 // Lazy load route components
 const Landing = lazy(() => import("./pages/Landing.tsx"));
@@ -46,10 +47,18 @@ import { DemoSelector } from "./components/shared/DemoSelector";
 // Simple loading fallback
 function RouteLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDF8F0]">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-[#3B5998] border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm text-[#8B7355]">Loading...</span>
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
+      <div className="absolute inset-0 surface-grid opacity-20 pointer-events-none" />
+      <div className="flex flex-col items-center gap-4 relative">
+        <DNASpinner size="lg" />
+        <div className="flex flex-col items-center gap-1">
+          <span className="data-figure text-[10px] tracking-widest text-muted-foreground">
+            INITIALIZING CLINICAL ENGINE
+          </span>
+          <span className="data-figure text-[10px] tracking-widest text-trust-400 animate-blink-soft">
+            LOADING
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -157,6 +166,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
       <ConvexProvider client={convex}>
+        <CustomCursor />
         <ToolbarErrorBoundary>
           <VlyToolbar />
         </ToolbarErrorBoundary>
