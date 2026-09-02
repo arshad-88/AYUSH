@@ -45,13 +45,13 @@ import {
 const fadeInUp = {
   initial: { opacity: 0, y: 28 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const },
+  transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const },
 };
 
 const staggerContainer = {
   animate: {
     transition: {
-      staggerChildren: 0.09,
+      staggerChildren: 0.08,
     },
   },
 };
@@ -168,22 +168,27 @@ export default function Landing() {
               </motion.div>
             </motion.div>
 
-            {/* RIGHT: anatomically themed 3D + floating panels */}
+            {/* RIGHT: anatomically themed 3D + floating panels.
+                Entrance choreography: parent fades + lifts in first (0–0.55s),
+                then panels stagger AFTER parent settles (0.55s+). This avoids
+                the scale-vs-translate overlap that produced visible jitter. */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="relative aspect-square max-w-[620px] mx-auto w-full"
             >
               <div className="absolute inset-0 bg-gradient-radial from-trust-500/20 via-transparent to-transparent blur-3xl" />
-              <AnatomicalHeart className="absolute inset-0" size={620} />
+              <AnatomicalHeart className="absolute inset-0 z-0" size={620} />
 
-              {/* Floating data panels — deeper layering, more whitespace */}
+              {/* Floating data panels — z-10 so they layer cleanly above the
+                  heart asset without any stacking-context surprises during
+                  their individual transforms. */}
               <motion.div
                 initial={{ opacity: 0, x: -36 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7, duration: 0.9 }}
-                className="absolute -left-6 sm:left-2 top-4 lab-card lab-card-elevated p-4 w-48 card-sheen"
+                transition={{ delay: 0.55, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute z-10 -left-6 sm:left-2 top-4 lab-card lab-card-elevated p-4 w-48 card-sheen"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="eyebrow text-[9px]">CARDIAC OUTPUT</span>
@@ -199,8 +204,8 @@ export default function Landing() {
               <motion.div
                 initial={{ opacity: 0, x: 36 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.9, duration: 0.9 }}
-                className="absolute -right-4 sm:right-0 top-1/3 lab-card lab-card-elevated p-4 w-44 card-sheen"
+                transition={{ delay: 0.7, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute z-10 -right-4 sm:right-0 top-1/3 lab-card lab-card-elevated p-4 w-44 card-sheen"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="eyebrow text-[9px]">RISK INDEX</span>
@@ -216,8 +221,8 @@ export default function Landing() {
               <motion.div
                 initial={{ opacity: 0, y: 36 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1, duration: 0.9 }}
-                className="absolute -right-4 sm:right-4 bottom-8 lab-card lab-card-elevated p-4 w-56 card-sheen"
+                transition={{ delay: 0.85, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute z-10 -right-4 sm:right-4 bottom-8 lab-card lab-card-elevated p-4 w-56 card-sheen"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="eyebrow text-[9px]">EKG · LIVE STREAM</span>
@@ -237,8 +242,8 @@ export default function Landing() {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.3, duration: 0.9 }}
-                className="absolute -bottom-2 left-6 lab-card lab-card-elevated p-4 w-56 card-sheen"
+                transition={{ delay: 1.0, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute z-10 -bottom-2 left-6 lab-card lab-card-elevated p-4 w-56 card-sheen"
               >
                 <BiomarkerBar
                   value={86}

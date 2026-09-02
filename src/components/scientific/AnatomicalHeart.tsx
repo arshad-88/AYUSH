@@ -42,13 +42,15 @@ export function AnatomicalHeart({ className, size = 520 }: Props) {
       className={`relative ${className ?? ""}`}
       style={{ perspective: 1200, width: "100%", height: "100%" }}
     >
-      {/* Atmospheric radial backdrop */}
+      {/* Atmospheric radial backdrop — harmonized with the trust/teal palette
+          so the asset's red reads as a focal biological element, not a clash.
+          Two soft gradients: a primary teal core and a subtle blue accent. */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 50%, rgba(220,38,38,0.18) 0%, rgba(58,141,224,0.10) 35%, transparent 70%)",
-          filter: "blur(20px)",
+            "radial-gradient(ellipse at 50% 50%, rgba(20,184,166,0.18) 0%, rgba(58,141,224,0.10) 35%, transparent 72%)",
+          filter: "blur(22px)",
         }}
       />
 
@@ -59,14 +61,15 @@ export function AnatomicalHeart({ className, size = 520 }: Props) {
         transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.6 }}
         style={{ transformStyle: "preserve-3d", willChange: "transform" }}
       >
-        {/* Main webp asset */}
+        {/* Main webp asset — shadow now blends with teal so it feels integrated */}
         <img
           src="/heart-1.webp"
           alt="Anatomical human heart — 3D rendered"
           draggable={false}
           className="relative z-10 w-full h-full object-contain select-none pointer-events-none"
           style={{
-            filter: "drop-shadow(0 30px 60px rgba(220, 38, 38, 0.45)) drop-shadow(0 8px 18px rgba(0,0,0,0.7))",
+            filter:
+              "drop-shadow(0 30px 60px rgba(20, 184, 166, 0.30)) drop-shadow(0 8px 18px rgba(0,0,0,0.7))",
           }}
         />
 
@@ -80,13 +83,15 @@ export function AnatomicalHeart({ className, size = 520 }: Props) {
           }}
         />
 
-        {/* Subtle pulse glow */}
+        {/* Subtle pulse glow — softened to blend with the trust/teal ambient.
+            A faint warm halo preserves the heart's biological presence without
+            disrupting the unified palette. */}
         <div
           aria-hidden
           className="absolute inset-0 z-0 pointer-events-none animate-data-pulse"
           style={{
             background:
-              "radial-gradient(circle at 50% 55%, rgba(252,165,165,0.30) 0%, transparent 55%)",
+              "radial-gradient(circle at 50% 55%, rgba(252,165,165,0.16) 0%, transparent 55%)",
             filter: "blur(28px)",
           }}
         />
