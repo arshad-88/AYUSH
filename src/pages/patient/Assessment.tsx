@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePatientStore } from "@/store/patientStore";
+import { useConvexAYUSH } from "@/hooks/useConvexAYUSH";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
@@ -20,7 +21,9 @@ import {
 
 export default function Assessment() {
   const navigate = useNavigate();
-  const { ayush, setAYUSH, aharaVihara, setAharaVihara, language, setStep } = usePatientStore();
+  const { ayush, setAYUSH, aharaVihara, setAharaVihara, language, setStep, consultationId } = usePatientStore();
+  const { existingAssessment, saveAYUSH } = useConvexAYUSH(consultationId as any);
+  const [isSaving, setIsSaving] = useState(false);
   const parameters = ayushService.getParameterOptions();
   const [expandedParam, setExpandedParam] = useState<string | null>(
     parameters.find((p) => !ayush[p.id as keyof typeof ayush])?.id || null
@@ -30,6 +33,26 @@ export default function Assessment() {
   const validation = useMemo(() => ayushService.validateAssessment(ayush), [ayush]);
   const aharaFields = ["diet", "sleep", "bowelHabits", "dailyRoutine", "substances"] as const;
   const aharaComplete = aharaFields.every((field) => Boolean(aharaVihara[field]?.trim()));
+
+  // Hydrate from Convex when available
+  useEffect(() => {
+    if (existingAssessment) {
+      const { responses, aharaVihara: savedAhara } = existingAssessment;
+      // Only update if store is empty (or we could merge)
+      const currentAyush = usePatientStore.getState().ayush;
+      const hasValues = Object.values(currentAyush).some(v => v && v.trim());
+      if (!hasValues && responses) {
+        setAYUSH(responses);
+      }
+      if (savedAhara) {
+        const currentAhara = usePatientStore.getState().aharaVihara;
+        const hasAhara = Object.values(currentAhara).some(v => v && v.trim());
+        if (!hasAhara) {
+          setAharaVihara(savedAhara);
+        }
+      }
+    }
+  }, [existingAssessment, setAYUSH, setAharaVihara]);
 
   const localizedOptionLabel = (label: string) => {
     if (language === "English") return label;
@@ -267,17 +290,27 @@ export default function Assessment() {
 
           <Button
             className="bg-vintage-blue hover:bg-vintage-blue/90"
-            disabled={!validation.isComplete || (showAhara && !aharaComplete)}
-            onClick={() => {
+            disabled={!validation.isComplete || (showAhara && !aharaComplete) || isSaving}
+            onClick={async () => {
               if (!showAhara) {
                 setShowAhara(true);
                 return;
               }
-              setStep("documents");
-              navigate("/patient/document");
+              if (validation.isComplete && aharaComplete) {
+                setIsSaving(true);
+                try {
+                  await saveAYUSH(ayush, aharaVihara);
+                  setStep("documents");
+                  navigate("/patient/document");
+                } catch (error) {
+                  console.error("Failed to save AYUSH:", error);
+                } finally {
+                  setIsSaving(false);
+                }
+              }
             }}
           >
-            {!showAhara ? (language === "Telugu" ? "ఆహార-విహారానికి కొనసాగండి" : language === "Hindi" ? "आहार-विहार पर जाएँ" : "Continue to Ahara-Vihara") : (language === "Telugu" ? "పత్రాలకు కొనసాగండి" : language === "Hindi" ? "दस्तावेज़ों पर जाएँ" : "Continue to Documents")}
+            {isSaving ? "Saving..." : (!showAhara ? (language === "Telugu" ? "ఆహార-విహారానికి కొనసాగండి" : language === "Hindi" ? "आहार-विहार पर जाएँ" : "Continue to Ahara-Vihara") : (language === "Telugu" ? "పత్రాలకు కొనసాగండి" : language === "Hindi" ? "दस्तावेज़ों पर जाएँ" : "Continue to Documents"))}
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </div>

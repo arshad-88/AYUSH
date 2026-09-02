@@ -85,6 +85,7 @@ export interface PatientState {
   currentStep: string;
   consentGiven: boolean;
   inputMode: "voice" | "touch" | null;
+  consultationId: string | null;
 
   // ── Actions ──────────────────────────────────────────────────────────────
   setPatient: (data: Partial<PatientState>) => void;
@@ -108,6 +109,7 @@ export interface PatientState {
   completeAssessment: () => void;
   setInterviewProgress: (question: string, targetField: string | null) => void;
   setInterviewMessages: (messages: PatientState["interviewMessages"]) => void;
+  setConsultationId: (id: string | null) => void;
 
   // ── ClinicalState actions ─────────────────────────────────────────────────
   updateClinicalState: (updates: Partial<ClinicalState>) => void;
@@ -201,7 +203,8 @@ export const usePatientStore = create<PatientState>()(
       currentStep: "landing",
       consentGiven: false,
       inputMode: null,
-
+      consultationId: null,
+ 
       // ── Actions ────────────────────────────────────────────────────────────
       setPatient: (data) => set((state) => ({ ...state, ...data })),
 

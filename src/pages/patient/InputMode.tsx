@@ -3,18 +3,30 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
+import { useConvexConsultation } from "@/hooks/useConvexConsultation";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { Mic, Touchpad, ArrowRight, ArrowLeft } from "lucide-react";
+import { useState } from "react";
 
 export default function InputMode() {
   const navigate = useNavigate();
   const { inputMode, setInputMode, setStep } = usePatientStore();
+  const { persistConsultationUpdate } = useConvexConsultation();
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!inputMode) return;
-    setStep("interview");
-    navigate("/patient/interview");
+    setIsSaving(true);
+    try {
+      await persistConsultationUpdate({ inputMode });
+      setStep("interview");
+      navigate("/patient/interview");
+    } catch (error) {
+      console.error("Failed to save input mode:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

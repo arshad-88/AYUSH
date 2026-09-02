@@ -3,19 +3,31 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
+import { useConvexConsultation } from "@/hooks/useConvexConsultation";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { Languages, ArrowRight, Check } from "lucide-react";
 import { demoLanguages } from "@/data/demoData";
+import { useState } from "react";
 
 export default function Language() {
   const navigate = useNavigate();
   const { language, setLanguage, setStep } = usePatientStore();
+  const { persistConsultationUpdate } = useConvexConsultation();
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!language) return;
-    setStep("inputMode");
-    navigate("/patient/input-mode");
+    setIsSaving(true);
+    try {
+      await persistConsultationUpdate({ language });
+      setStep("inputMode");
+      navigate("/patient/input-mode");
+    } catch (error) {
+      console.error("Failed to save language:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

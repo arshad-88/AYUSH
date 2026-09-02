@@ -3,19 +3,38 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { usePatientStore } from "@/store/patientStore";
+import { useConvexPatient } from "@/hooks/useConvexPatient";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { ShieldAlert, ArrowRight, ShieldCheck, FileText, Lock } from "lucide-react";
+import { useState } from "react";
 
 export default function Consent() {
   const navigate = useNavigate();
   const { setConsent, setStep } = usePatientStore();
+  const { persistPatientUpdate } = useConvexPatient();
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleConsent = () => {
-    setConsent(true);
-    setStep("language");
-    navigate("/patient/language");
+  const { consentGiven } = usePatientStore();
+
+  const handleConsent = async () => {
+    setIsSaving(true);
+    try {
+      await persistPatientUpdate({ consentGiven: true });
+      setConsent(true);
+      setStep("language");
+      navigate("/patient/language");
+    } catch (error) {
+      console.error("Failed to save consent:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (consentGiven) {
+    navigate("/patient/language", { replace: true });
+    return null;
+  }
 
   return (
     <div className="min-h-screen vintage-texture flex flex-col">

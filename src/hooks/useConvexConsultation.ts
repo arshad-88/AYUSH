@@ -5,9 +5,8 @@ import { useEffect, useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 
 export function useConvexConsultation() {
-  const { id: patientId, language, inputMode, clinicalState, socrates, ayush, aharaVihara, verification, interviewComplete, assessmentStatus, activeInterviewQuestion, activeInterviewTargetField } = usePatientStore();
+  const { id: patientId, language, inputMode, clinicalState, socrates, ayush, aharaVihara, verification, interviewComplete, assessmentStatus, activeInterviewQuestion, activeInterviewTargetField, consultationId, setConsultationId } = usePatientStore();
   const [loading, setLoading] = useState(true);
-  const [consultationId, setConsultationId] = useState<Id<"consultations"> | null>(null);
 
   // Query active consultation
   const activeConsultation = useQuery(

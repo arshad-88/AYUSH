@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePatientStore } from "@/store/patientStore";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
@@ -63,7 +65,7 @@ const buildSummaryFromAnalysis = (analysis: Awaited<ReturnType<ReturnType<typeof
 
 export default function DocumentUpload() {
   const navigate = useNavigate();
-  const { documents, addDocument, setStep, clinicalState, updateClinicalState } = usePatientStore();
+  const { documents, addDocument, setStep, clinicalState, updateClinicalState, id: patientId, consultationId } = usePatientStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,38 @@ export default function DocumentUpload() {
   const [processedDocument, setProcessedDocument] = useState<DocumentExtraction | null>(null);
   const [editingFactKey, setEditingFactKey] = useState<string | null>(null);
   const [draftFactValue, setDraftFactValue] = useState<string>("");
+
+  const convexDocs = useQuery(api.documents.getDocumentsByPatient, patientId ? { patientId: patientId as any } : "skip");
+  const createDocument = useMutation(api.documents.createDocument);
+  const updateDocument = useMutation(api.documents.updateDocument);
+
+  // Hydrate from Convex on mount
+  useEffect(() => {
+    if (convexDocs && convexDocs.length > 0 && documents.length === 0) {
+      // Convert Convex documents to store format (simplified)
+      const storeDocs: DocumentExtraction[] = convexDocs.map((doc) => ({
+        id: doc._id,
+        fileName: doc.filename,
+        filename: doc.filename,
+        fileType: doc.fileType,
+        type: doc.fileType,
+        extractedData: doc.extractedData,
+        confidence: doc.confidence,
+        rawText: doc.rawText,
+        timestamp: new Date(doc.uploadTimestamp).toISOString(),
+        status: doc.processingStatus || "completed",
+        documentFacts: doc.documentFacts,
+        documentType: doc.documentType,
+        classificationConfidence: doc.classificationConfidence,
+        classificationConfidenceLevel: doc.classificationConfidenceLevel,
+        reviewRequired: doc.reviewRequired,
+        verificationStatus: doc.verificationStatus,
+        warnings: doc.warnings,
+        error: doc.error,
+      }));
+      storeDocs.forEach((doc) => addDocument(doc));
+    }
+  }, [convexDocs, documents.length, addDocument]);
 
   const uploadedDocs = useMemo(() => documents ?? [], [documents]);
 
