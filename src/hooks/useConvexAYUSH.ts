@@ -18,19 +18,20 @@ export function useConvexAYUSH(consultationId: Id<"consultations"> | null) {
 
   useEffect(() => {
     if (!consultationId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       return;
     }
     if (existingAssessment === undefined) {
+       
       setLoading(true);
       return;
     }
     if (existingAssessment) {
       setAssessmentId(existingAssessment._id);
-      // Optionally hydrate store with existing data
-      const { responses, aharaVihara } = existingAssessment;
-      // We could update the store here, but we'll let the page handle that
+      // existing data available; page will hydrate
     }
+     
     setLoading(false);
   }, [consultationId, existingAssessment]);
 

@@ -341,7 +341,8 @@ export const usePatientStore = create<PatientState>()(
         set({ activeInterviewQuestion: question, activeInterviewTargetField: targetField }),
 
       setInterviewMessages: (messages) => set({ interviewMessages: messages }),
-
+      setConsultationId: (id) => set({ consultationId: id }),
+ 
       // ── ClinicalState actions ───────────────────────────────────────────────
       updateClinicalState: (updates) =>
         set((state) => ({

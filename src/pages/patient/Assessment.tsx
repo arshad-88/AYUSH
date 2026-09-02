@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePatientStore } from "@/store/patientStore";
 import { useConvexAYUSH } from "@/hooks/useConvexAYUSH";
+import { Id } from "@/convex/_generated/dataModel";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
 import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
@@ -22,7 +23,7 @@ import {
 export default function Assessment() {
   const navigate = useNavigate();
   const { ayush, setAYUSH, aharaVihara, setAharaVihara, language, setStep, consultationId } = usePatientStore();
-  const { existingAssessment, saveAYUSH } = useConvexAYUSH(consultationId as any);
+  const { existingAssessment, saveAYUSH } = useConvexAYUSH(consultationId ? (consultationId as Id<"consultations">) : null);
   const [isSaving, setIsSaving] = useState(false);
   const parameters = ayushService.getParameterOptions();
   const [expandedParam, setExpandedParam] = useState<string | null>(
@@ -299,7 +300,7 @@ export default function Assessment() {
               if (validation.isComplete && aharaComplete) {
                 setIsSaving(true);
                 try {
-                  await saveAYUSH(ayush, aharaVihara);
+                  await saveAYUSH(ayush, aharaVihara as Record<string, string>);
                   setStep("documents");
                   navigate("/patient/document");
                 } catch (error) {

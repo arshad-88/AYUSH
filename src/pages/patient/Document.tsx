@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { usePatientStore } from "@/store/patientStore";
-import { useMutation } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/shared/Header";
 import { StepProgress } from "@/components/shared/StepProgress";
@@ -82,7 +82,7 @@ export default function DocumentUpload() {
   useEffect(() => {
     if (convexDocs && convexDocs.length > 0 && documents.length === 0) {
       // Convert Convex documents to store format (simplified)
-      const storeDocs: DocumentExtraction[] = convexDocs.map((doc) => ({
+      const storeDocs: DocumentExtraction[] = convexDocs.map((doc: any) => ({
         id: doc._id,
         fileName: doc.filename,
         filename: doc.filename,
