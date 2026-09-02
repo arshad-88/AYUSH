@@ -36,6 +36,14 @@ export const createAYUSH = mutation({
     if (!user) throw new Error("Not authenticated");
     const patient = await ctx.db.get(args.patientId);
     if (!patient || patient.userId !== user._id) throw new Error("Not authorized");
+    // Check if an assessment already exists for this consultation
+    const existing = await ctx.db
+      .query("ayushAssessments")
+      .withIndex("by_consultation", (q) => q.eq("consultationId", args.consultationId))
+      .first();
+    if (existing) {
+      throw new Error("An AYUSH assessment already exists for this consultation. Use updateAYUSH instead.");
+    }
     const now = Date.now();
     return await ctx.db.insert("ayushAssessments", {
       patientId: args.patientId,
@@ -65,8 +73,10 @@ export const updateAYUSH = mutation({
     if (!user) throw new Error("Not authenticated");
     const assessment = await ctx.db.get(args.assessmentId);
     if (!assessment) throw new Error("Assessment not found");
+    // Verify the assessment belongs to the current user
     const patient = await ctx.db.get(assessment.patientId);
     if (!patient || patient.userId !== user._id) throw new Error("Not authorized");
+    // Ensure the consultation still exists? Not needed.
     const updateData: any = { updatedAt: Date.now() };
     if (args.responses !== undefined) updateData.responses = args.responses;
     if (args.aharaVihara !== undefined) updateData.aharaVihara = args.aharaVihara;
