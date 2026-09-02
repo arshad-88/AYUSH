@@ -32,6 +32,7 @@ import {
   Mic,
   Lock,
   Cpu,
+  Heart,
 } from "lucide-react";
 import {
   BiomarkerBar,
@@ -40,6 +41,7 @@ import {
   RingProgress,
   StatusBar,
   AreaSparkline,
+  AnatomicalHeartDetail,
 } from "@/components/scientific";
 
 const socratesLabels: Record<string, { label: string; description: string }> = {
@@ -235,6 +237,61 @@ export default function PatientDetail() {
               </div>
             </div>
           </div>
+
+          {/* Interactive Cardiac Anatomy — 3D heart with clinical hotspots */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="lab-card lab-card-elevated lab-card-accent p-8 sm:p-10 relative overflow-hidden"
+          >
+            <div className="absolute top-3 right-3">
+              <StatusBar latency="42ms" sessionId="CARD-VIEW" />
+            </div>
+            <div className="grid lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-red-urgent/15 border border-red-urgent/30 flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-red-critical" strokeWidth={1.6} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold tracking-tight-x">Cardiac Anatomy</h3>
+                    <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                      INTERACTIVE · HOTSPOT-ENABLED
+                    </span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Hover any anatomical landmark to surface its clinical context.
+                  Each hotspot surfaces a one-line fact plus a key parameter for
+                  the consulting physician.
+                </p>
+                <div className="mt-6 grid grid-cols-3 gap-3">
+                  <div className="lab-card-floating p-3">
+                    <span className="eyebrow text-[9px]">EF · LV</span>
+                    <p className="data-figure-lg text-xl font-bold text-mint-400 mt-1">
+                      62<span className="text-xs text-muted-foreground">%</span>
+                    </p>
+                  </div>
+                  <div className="lab-card-floating p-3">
+                    <span className="eyebrow text-[9px]">EF · RV</span>
+                    <p className="data-figure-lg text-xl font-bold text-trust-300 mt-1">
+                      58<span className="text-xs text-muted-foreground">%</span>
+                    </p>
+                  </div>
+                  <div className="lab-card-floating p-3">
+                    <span className="eyebrow text-[9px]">BP</span>
+                    <p className="data-figure-lg text-xl font-bold text-teal-400 mt-1">
+                      120/80
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="relative aspect-square w-full mx-auto rounded-2xl overflow-hidden">
+                <AnatomicalHeartDetail className="w-full h-full" />
+              </div>
+            </div>
+          </motion.div>
 
           {/* Two column body */}
           <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">

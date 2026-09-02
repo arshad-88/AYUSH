@@ -678,7 +678,7 @@ export function HeroCanvas({
     <div className={className}>
       <Canvas
         camera={{ position: [0, 0, cameraDistance], fov: 50 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       >
         <color attach="background" args={["#07101C"]} />

@@ -8,6 +8,7 @@ export { ScanText } from "./ScanText";
 export { ParticleField } from "./ParticleField";
 export { HeroCanvas } from "./HeroCanvas";
 export { AnatomicalHeart } from "./AnatomicalHeart";
+export { AnatomicalHeartDetail } from "./AnatomicalHeartDetail";
 export { StepTrack } from "./StepTrack";
 export { RingProgress } from "./RingProgress";
 export { StatusBar } from "./StatusBar";

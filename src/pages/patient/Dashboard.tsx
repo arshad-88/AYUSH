@@ -25,9 +25,11 @@ import {
 import {
   BiomarkerBar,
   EkgWave,
+  EmptyState,
   RingProgress,
   StatusBar,
 } from "@/components/scientific";
+import { FilePlus, BookOpen } from "lucide-react";
 
 type DashboardView = "overview" | "consultation-detail";
 
@@ -270,8 +272,23 @@ export default function PatientDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="lab-card lab-card-accent p-6 text-center text-muted-foreground">
-                <p className="text-sm">No previous consultations found.</p>
+              <div className="lab-card lab-card-accent p-8">
+                <EmptyState
+                  variant="timeline"
+                  title="No previous consultations"
+                  description="Your past OPD visits will appear here once they're imported from ABDM or manually added by your clinician."
+                  primaryAction={{
+                    label: "Add New Record",
+                    onClick: () => navigate("/patient/document"),
+                    icon: <FilePlus className="w-4 h-4" />,
+                  }}
+                  secondaryAction={{
+                    label: "Explore Tutorial",
+                    onClick: () => navigate("/"),
+                    icon: <BookOpen className="w-4 h-4" />,
+                    variant: "outline",
+                  }}
+                />
               </div>
             )}
           </div>
