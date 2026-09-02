@@ -1,0 +1,462 @@
+export type AppMode = "demo" | "hybrid" | "production";
+
+// ============================================================
+// PATIENT
+// ============================================================
+export type AuthProvider = "aadhaar" | "abha" | "mobile" | "demo";
+export type VerificationStatus = "pending" | "verified" | "rejected" | "demo";
+
+export interface PatientIdentity {
+  patientId: string;
+  abhaId?: string;
+  displayName: string;
+  dateOfBirth?: string;
+  gender?: string;
+  identityProvider: AuthProvider;
+  verificationStatus: VerificationStatus;
+  isGuardian: boolean;
+  linkedPatientIds: string[];
+  createdAt: string;
+}
+
+export interface Patient {
+  id: string;
+  patientId?: string;
+  name: string;
+  age?: number;
+  gender?: string;
+  abhaId?: string;
+  mobileNumber?: string;
+  displayName?: string;
+  identityProvider?: AuthProvider;
+  verificationStatus?: VerificationStatus;
+  isGuardian?: boolean;
+  linkedPatientIds?: string[];
+}
+
+// ============================================================
+// PROVENANCE — every clinical fact must carry its source
+// ============================================================
+export type ClinicalFactSource = "PATIENT" | "DOCUMENT" | "DOCTOR" | "SYSTEM";
+
+export interface ClinicalFact {
+  field: string;
+  value: string;
+  source: ClinicalFactSource;
+  confidence: number; // 0–1
+  verified: boolean;
+  timestamp?: string;
+  documentId?: string;
+  evidence?: string;
+  originalValue?: string;
+  editedValue?: string;
+  status?: "pending" | "confirmed" | "edited" | "rejected";
+  verifiedBy?: string;
+  verifiedAt?: string;
+}
+
+export type DocumentType =
+  | "prescription"
+  | "laboratory-report"
+  | "discharge-summary"
+  | "consultation-note"
+  | "medical-certificate"
+  | "identity-document"
+  | "unknown";
+
+export type ConfidenceLevel = "high" | "medium" | "low";
+
+export interface DocumentPatientSummary {
+  name?: string;
+  age?: string;
+  gender?: string;
+  weight?: string;
+}
+
+export interface DocumentHeaderSummary {
+  documentDate?: string;
+  doctor?: string;
+  facility?: string;
+}
+
+export interface DocumentMedicationSummary {
+  name?: string;
+  strength?: string;
+  dose?: string;
+  route?: string;
+  frequency?: string;
+  duration?: string;
+  instructions?: string;
+  raw?: string;
+}
+
+export interface DocumentLabResult {
+  testName?: string;
+  result?: string;
+  unit?: string;
+  referenceRange?: string;
+  status?: "normal" | "abnormal" | "uncertain";
+  testDate?: string;
+  raw?: string;
+}
+
+export interface DocumentAnalysis {
+  documentType: DocumentType;
+  classificationConfidence: number;
+  classificationConfidenceLevel: ConfidenceLevel;
+  reviewRequired: boolean;
+  verificationStatus: "requires-review" | "verified" | "rejected";
+  rawOcrText: string;
+  ocrEngine: "tesseract" | "unknown";
+  patient?: DocumentPatientSummary;
+  document?: DocumentHeaderSummary;
+  clinical?: {
+    chiefComplaint?: string;
+    diagnosis?: string;
+    symptoms?: string[];
+    vitals?: Record<string, string>;
+  };
+  medications?: DocumentMedicationSummary[];
+  labResults?: DocumentLabResult[];
+  structuredFacts: ClinicalFact[];
+  warnings?: string[];
+}
+
+export interface ClinicalContradiction {
+  field: string;
+  sourceA: ClinicalFactSource;
+  valueA: string;
+  sourceB: ClinicalFactSource;
+  valueB: string;
+  message: string;
+}
+
+// ============================================================
+// CLINICAL STATE — authoritative, centralized, provenance-aware
+// ============================================================
+export interface ClinicalState {
+  chiefComplaint?: string;
+
+  // SOCRATES
+  site?: string;
+  onset?: string;
+  duration?: string;
+  character?: string;
+  radiation?: string;
+  severity?: number | null; // numeric 0–10
+  associatedSymptoms: string[];
+  timing?: string;
+  aggravatingFactors?: string;
+  relievingFactors?: string;
+
+  // History
+  pastMedicalHistory: string[];
+  medications: string[];
+  allergies: string[];
+  familyHistory?: string;
+  personalHistory?: string;
+
+  // Review of systems (keyed by system name)
+  reviewOfSystems: Record<string, string>;
+
+  // AYUSH — Dashavidha + Ahara-Vihara (application-controlled, not Groq-invented)
+  ayush: AyushAssessment;
+  aharaVihara: AharaVihara;
+  ayushUnknownFields: string[];
+  ayushComplete: boolean;
+  ayushPhysicianVerified: boolean;
+
+  // Provenance layers
+  patientFacts: ClinicalFact[];
+  documentFacts: ClinicalFact[];
+  verifiedFacts: ClinicalFact[];
+
+  // Meta
+  unknownFields: string[];
+  contradictions: ClinicalContradiction[];
+  documentReferences: string[]; // filenames / doc IDs processed
+  completeness: number; // 0–1
+}
+
+export const defaultAharaVihara = (): AharaVihara => ({
+  diet: "",
+  sleep: "",
+  bowelHabits: "",
+  dailyRoutine: "",
+  substances: "",
+});
+
+export const defaultAyushAssessment = (): AyushAssessment => ({
+  prakriti: "",
+  vikriti: "",
+  sara: "",
+  samhanana: "",
+  pramana: "",
+  satmya: "",
+  satva: "",
+  aharaShakti: "",
+  vyayamaShakti: "",
+  vaya: "",
+});
+
+export const defaultClinicalState = (): ClinicalState => ({
+  associatedSymptoms: [],
+  pastMedicalHistory: [],
+  medications: [],
+  allergies: [],
+  reviewOfSystems: {},
+  ayush: defaultAyushAssessment(),
+  aharaVihara: defaultAharaVihara(),
+  ayushUnknownFields: [],
+  ayushComplete: false,
+  ayushPhysicianVerified: false,
+  patientFacts: [],
+  documentFacts: [],
+  verifiedFacts: [],
+  unknownFields: [],
+  contradictions: [],
+  documentReferences: [],
+  completeness: 0,
+});
+
+// ============================================================
+// LEGACY SOCRATES (preserved for backward compat with existing store/pages)
+// ============================================================
+export interface SOCRATESResponse {
+  site: string;
+  onset: string;
+  character: string;
+  radiation: string;
+  associatedSymptoms: string;
+  timing: string;
+  exacerbatingFactors: string;
+  relievingFactors: string;
+  severity: string;
+  [key: string]: string;
+}
+
+export interface ClinicalHistory {
+  chiefComplaint?: string;
+  site?: string;
+  onset?: string;
+  duration?: string;
+  character?: string;
+  radiation?: string;
+  associatedSymptoms?: string;
+  timing?: string;
+  exacerbatingFactors?: string;
+  relievingFactors?: string;
+  severity?: string;
+  pastMedicalHistory?: string;
+  medications?: string;
+  allergies?: string;
+  familyHistory?: string;
+  personalHistory?: string;
+  [key: string]: string | undefined;
+}
+
+// ============================================================
+// AYUSH
+// ============================================================
+export interface AharaVihara {
+  diet?: string;
+  sleep?: string;
+  bowelHabits?: string;
+  dailyRoutine?: string;
+  substances?: string;
+  [key: string]: string | undefined;
+}
+
+export interface AyushAssessment {
+  prakriti?: string;
+  vikriti?: string;
+  sara?: string;
+  samhanana?: string;
+  pramana?: string;
+  satmya?: string;
+  satva?: string;
+  aharaShakti?: string;
+  vyayamaShakti?: string;
+  vaya?: string;
+  [key: string]: string | undefined;
+}
+
+export interface AYUSHAssessment {
+  prakriti: string;
+  vikriti: string;
+  sara: string;
+  samhanana: string;
+  pramana: string;
+  satmya: string;
+  satva: string;
+  aharaShakti: string;
+  vyayamaShakti: string;
+  vaya: string;
+  [key: string]: string;
+}
+
+// ============================================================
+// TRIAGE
+// ============================================================
+export interface TriageResult {
+  priority: "urgent" | "priority" | "routine" | "";
+  reasons: string[];
+  confidence: number;
+  timestamp: string;
+}
+
+// ============================================================
+// TIMELINE
+// ============================================================
+export interface TimelineEvent {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  type: "encounter" | "lab" | "medication" | "observation";
+  source?: ClinicalFactSource; // NEW: provenance for timeline events
+}
+
+// ============================================================
+// DOCUMENTS & OCR
+// ============================================================
+export interface DocumentExtraction {
+  id: string;
+  filename?: string;
+  fileName?: string;
+  type?: string;
+  fileType?: string;
+  status?: "pending" | "processing" | "completed" | "failed";
+  extractedData: Record<string, string>;
+  confidence?: Record<string, number>;
+  rawText?: string;
+  timestamp?: string;
+  error?: string;
+  documentFacts?: ClinicalFact[]; // NEW: structured facts from this doc
+  documentType?: DocumentType;
+  classificationConfidence?: number;
+  classificationConfidenceLevel?: ConfidenceLevel;
+  reviewRequired?: boolean;
+  verificationStatus?: "requires-review" | "verified" | "rejected";
+  warnings?: string[];
+  [key: string]: unknown;
+}
+
+export interface OcrResult {
+  text: string;
+  confidence: number;
+  entities?: Record<string, unknown>;
+}
+
+// ============================================================
+// CASE SHEET
+// ============================================================
+export interface CaseSheetData {
+  summary?: string;
+  clinicalAlerts?: string[];
+  missingInfo?: string[];
+  generatedAt?: string;
+  // NEW: provenance-aware sections
+  patientReported?: Record<string, string>;
+  documentReported?: Record<string, string>;
+  contradictions?: ClinicalContradiction[];
+}
+
+// ============================================================
+// AI INTERVIEW
+// ============================================================
+export interface InterviewQuestion {
+  question: string;
+  targetField: string; // loosened from keyof ClinicalHistory
+  options?: string[];
+  hint?: string;      // e.g. "from your uploaded document"
+  fieldLabel?: string;
+}
+
+export interface CaseSummary {
+  summary: string;
+  redFlags: string[];
+}
+
+// ============================================================
+// AI RESPONSE TYPES (validated by Zod in aiSchemas.ts)
+// ============================================================
+export interface GroqExtractedFields {
+  chiefComplaint: string | null;
+  site: string | null;
+  onset: string | null;
+  duration: string | null;
+  character: string | null;
+  radiation: string | null;
+  severity: number | null;
+  associatedSymptoms: string[];
+  timing: string | null;
+  aggravatingFactors: string | null;
+  relievingFactors: string | null;
+  pastMedicalHistory: string[];
+  medications: string[];
+  allergies: string[];
+  familyHistory: string | null;
+  personalHistory: string | null;
+}
+
+export interface GroqNextQuestionSuggestion {
+  field: string;
+  reason: string;
+}
+
+export interface GroqContradiction {
+  field: string;
+  existingValue: string;
+  newValue: string;
+  message: string;
+}
+
+export interface GroqInterviewResponse {
+  extracted: GroqExtractedFields;
+  missingFields: string[];
+  documentRelatedFindings: string[];
+  possibleContradictions: GroqContradiction[];
+  nextQuestionSuggestion: GroqNextQuestionSuggestion;
+  confidence: number;
+}
+
+// ============================================================
+// DOCTOR
+// ============================================================
+export interface DoctorVerification {
+  status: "pending" | "confirmed" | "edited" | "rejected";
+  overridePriority?: "routine" | "priority" | "urgent";
+  overrideReason?: string;
+  verifiedAt?: string;
+}
+
+export interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  available: boolean;
+}
+
+// ============================================================
+// FHIR / ABDM
+// ============================================================
+export interface FHIRBundle {
+  resourceType: "Bundle";
+  type: string;
+  entry: unknown[];
+}
+
+// ============================================================
+// EXPLAINABILITY (triage)
+// ============================================================
+export interface Explainability {
+  factors: Array<{
+    factor: string;
+    impact: "high" | "medium" | "low";
+    description: string;
+    detected: boolean;
+  }>;
+  overallConfidence: number;
+  disclaimer: string;
+}

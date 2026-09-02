@@ -1,0 +1,398 @@
+Use this prompt with your AI coding agent:
+
+```text
+Continue the MediKiosk AI work from the CURRENT codebase. Do not redesign the architecture and do not touch the Document/OCR subsystem being developed separately.
+
+The current foundation already exists:
+- ClinicalState
+- QuestionPlanner
+- complaint-specific question plans
+- LocalAiInterviewService
+- GroqAiInterviewService
+- answer extraction
+- interview i18n
+- ASR/TTS abstractions
+- AYUSH fields in ClinicalState
+
+Your job is to finish EVERYTHING still missing in the AI/Interview + AYUSH portion.
+
+==================================================
+1. FINISH THE ACTUAL INTERVIEW UI
+==================================================
+
+Inspect the existing Interview page and connect it properly to the existing AI services.
+
+The UI must NOT use a fixed hardcoded SOCRATES sequence.
+
+Flow:
+
+Patient selects complaint
+→ AI asks one question
+→ patient answers by voice/touch/text
+→ answer is processed
+→ ClinicalState is updated
+→ QuestionPlanner determines next question
+→ next question is shown
+
+The QuestionPlanner must remain the authoritative controller.
+
+Support at minimum:
+- chest pain
+- abdominal pain
+- headache
+- fever
+- cough/breathlessness
+- general complaint
+
+The UI must correctly handle:
+- normal answers
+- answers containing multiple facts
+- "I don't know"
+- "not sure"
+- contradictions
+- already-known information
+- document-known information when available
+- interview completion
+
+Do not ask questions for information that has already been resolved unless confirmation is clinically appropriate.
+
+==================================================
+2. ANSWER → CLINICALSTATE
+==================================================
+
+Verify that every patient answer actually updates the central ClinicalState.
+
+Use the existing:
+- answerExtraction
+- applyExtractedFields
+- markUnknown
+- ClinicalFact
+
+Do NOT create another state object for interview data.
+
+Every patient-derived fact must contain:
+- source: PATIENT
+- field
+- value
+- confidence
+- verified: false
+- timestamp
+
+Multiple facts from a single answer must be stored separately when appropriate.
+
+Example:
+
+Patient:
+"I have chest pain for 3 days, it is burning and gets worse after meals."
+
+Should be able to update multiple relevant fields rather than storing the entire sentence in one field.
+
+Do not fabricate information that the patient did not provide.
+
+==================================================
+3. LANGUAGE
+==================================================
+
+The language selected earlier in the patient journey is authoritative.
+
+Patient-facing AI questions must be displayed in the selected language.
+
+At minimum verify:
+- English
+- Hindi
+- Telugu
+
+Internal field names/state keys can remain English.
+
+Do not randomly switch languages.
+
+Check every path:
+- first question
+- follow-up questions
+- completion message
+- document-related hints
+- error/fallback messages
+- AYUSH questions
+
+If Groq is unavailable, Local AI must still produce questions in the selected language.
+
+==================================================
+4. SPEAKER / TTS
+==================================================
+
+The interview UI must have a clearly visible speaker button near the current AI question, preferably at the top of the chat/question area.
+
+Behavior:
+
+Speaker clicked
+→ speak CURRENT question
+
+Speaker clicked again/replay
+→ replay CURRENT question
+
+Replay MUST NOT:
+- send another Groq request
+- create another question
+- modify ClinicalState
+
+Use the existing TTS service abstraction.
+
+Browser speech synthesis can remain the prototype implementation.
+
+Keep the architecture ready for future Bhashini TTS integration.
+
+Also verify voice input through the existing ASR abstraction and ensure touch/text input remains available as a fallback.
+
+==================================================
+5. GROQ + LOCAL FALLBACK
+==================================================
+
+Groq should improve natural-language understanding, but it must NOT be required for the application to function.
+
+Required behavior:
+
+Groq available:
+→ use Groq where appropriate
+→ validate its suggested field/question against QuestionPlanner
+
+Groq unavailable/error/invalid response:
+→ automatically use LocalAiInterviewService
+
+Never expose GROQ_API_KEY in client-side code.
+
+Do NOT use VITE_GROQ_API_KEY.
+
+Do not allow Groq to invent arbitrary clinical questions outside the planner's allowed fields.
+
+Test the fallback deliberately.
+
+==================================================
+6. AYUSH ASSESSMENT — THIS IS THE BIGGEST REMAINING FEATURE
+==================================================
+
+Make the existing AYUSH Assessment page genuinely functional.
+
+It must NOT be a decorative Sanskrit option picker.
+
+Implement all 10 Dashavidha parameters required by the SIH problem statement:
+
+1. Prakriti
+2. Vikriti
+3. Sara
+4. Samhanana
+5. Pramana
+6. Satmya
+7. Sattva
+8. Ahara Shakti
+9. Vyayama Shakti
+10. Vaya
+
+Also collect:
+- Ahara-Vihara
+
+For Ahara-Vihara at minimum support:
+- diet/food habits
+- sleep
+- bowel habits
+- daily routine
+- relevant substance/habit information
+
+Questions/options must be understandable to an ordinary patient.
+
+Do not merely display Sanskrit terminology.
+
+For example, the UI can show:
+
+"How would you describe your usual body constitution?"
+
+and internally store the structured field as:
+
+prakriti
+
+Use the existing:
+ClinicalState.ayush
+ClinicalState.aharaVihara
+ClinicalState.ayushUnknownFields
+ClinicalState.ayushComplete
+ClinicalState.ayushPhysicianVerified
+
+Do not create a second AYUSH state system.
+
+==================================================
+7. AYUSH MUST BE PATIENT INPUT, NOT AI INVENTION
+==================================================
+
+Do NOT have Groq invent Prakriti, Vikriti, etc.
+
+The application should guide the patient through the assessment and record their responses.
+
+If a value cannot be established:
+- allow "I don't know"
+- add the field to ayushUnknownFields
+- do not invent a value
+
+Every collected AYUSH value should have appropriate provenance where the architecture supports it.
+
+The UI must make it obvious that these are patient-entered/assessment values requiring physician verification.
+
+==================================================
+8. AYUSH COMPLETION + PHYSICIAN VERIFICATION
+==================================================
+
+Implement real completion logic.
+
+AYUSH should become complete only when:
+- all required assessment fields have either a value OR are explicitly marked unknown
+- Ahara-Vihara required information is handled
+
+Do not mark it complete simply because the page was opened.
+
+Add/complete physician verification behavior using:
+ayushPhysicianVerified
+
+The doctor should be able to review/edit/verify AYUSH information.
+
+Do not claim the physician verified something when they have not.
+
+==================================================
+9. DOCUMENT-AWARE INTERVIEW COMPATIBILITY
+==================================================
+
+Do NOT implement the Document/OCR subsystem now.
+
+However, ensure the AI architecture correctly consumes existing documentFacts if they are already present.
+
+If an unverified document fact exists:
+- the planner may use it as context
+- the patient can confirm/correct it
+- the source must remain DOCUMENT
+- patient confirmation must remain distinguishable as PATIENT
+
+Never overwrite doctor-verified facts.
+
+==================================================
+10. SAFETY
+==================================================
+
+This is a clinical intake system, NOT an autonomous diagnosis system.
+
+Do NOT add:
+- autonomous diagnosis
+- prescription generation
+- treatment recommendations presented as medical decisions
+- fabricated clinical findings
+
+The AI is only collecting/structuring history.
+
+Triage remains deterministic/rule-based.
+
+Contradictory patient information must be preserved rather than silently overwritten.
+
+==================================================
+11. TESTS
+==================================================
+
+Before declaring this complete, add/run tests for:
+
+INTERVIEW:
+- chest pain branch
+- abdominal pain branch
+- headache branch
+- fever branch
+- cough/breathlessness branch
+- general branch
+- multi-fact answer
+- unknown answer
+- contradiction
+- already-known field
+- completion condition
+- ClinicalState update
+
+LANGUAGE:
+- English
+- Hindi
+- Telugu
+- Local AI language fallback
+
+VOICE:
+- speaker button
+- TTS current question
+- replay
+- replay does not call Groq
+- ASR fallback/touch input
+
+GROQ:
+- successful Groq response
+- malformed response
+- Groq unavailable
+- Local fallback
+
+AYUSH:
+- all 10 Dashavidha parameters
+- Ahara-Vihara
+- unknown AYUSH field
+- completion logic
+- physician verification
+- no invented values
+
+DOCUMENT COMPATIBILITY:
+- document fact visible as DOCUMENT provenance
+- patient confirmation remains PATIENT
+- doctor-verified fact is not overwritten
+
+==================================================
+12. MANUAL UI CHECK
+==================================================
+
+Actually run the application and manually test:
+
+Login
+→ Consent
+→ Language
+→ Input Mode
+→ Interview
+→ AYUSH Assessment
+
+Test at least one complete patient journey in English and one in Hindi or Telugu.
+
+Verify that the browser console has no runtime errors.
+
+==================================================
+13. VALIDATION
+==================================================
+
+Run:
+
+npx tsc --noEmit
+
+npm run build
+
+Fix all TypeScript/build errors.
+
+Do not report "done" if only the architecture exists.
+
+==================================================
+FINAL REPORT
+==================================================
+
+At the end report:
+
+1. Files changed
+2. Interview functionality completed
+3. Language functionality completed
+4. Voice/TTS functionality completed
+5. Groq/fallback status
+6. AYUSH functionality completed
+7. Physician verification status
+8. Tests performed
+9. tsc result
+10. build result
+11. Any remaining blockers
+
+IMPORTANT:
+- Implement the work; do not just analyze it.
+- Reuse the existing architecture.
+- Do not modify the Document/OCR subsystem except where a shared interface must remain compatible.
+- Do not create duplicate state-management or AI architectures.
+- If something is already implemented correctly, verify it instead of rewriting it.
+```
