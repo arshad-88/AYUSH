@@ -101,7 +101,7 @@ export default function Assessment() {
                     <Leaf className="w-6 h-6 text-vintage-gold" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                    <h1 className="text-xl font-bold text-foreground" >
                       AYUSH Assessment
                     </h1>
                     <p className="text-xs text-muted-foreground">
@@ -110,7 +110,7 @@ export default function Assessment() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-vintage-gold" style={{ fontFamily: "Georgia, serif" }}>
+                  <p className="text-2xl font-bold text-vintage-gold" >
                     {validation.completedCount}/{validation.totalCount}
                   </p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
@@ -183,7 +183,7 @@ export default function Assessment() {
                             )}
                           </div>
                           <div>
-                            <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                            <CardTitle className="text-sm" >
                               {param.name}
                               {language !== "English" && <span className="text-muted-foreground ml-2 text-xs font-normal">
                                 {param.id === "prakriti" ? (language === "Telugu" ? "ప్రకృతి" : "प्रकृति") :

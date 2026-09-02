@@ -48,7 +48,7 @@ export default function Language() {
               <div className="mx-auto w-14 h-14 rounded-xl bg-vintage-teal/10 flex items-center justify-center mb-4">
                 <Languages className="w-7 h-7 text-vintage-teal" />
               </div>
-              <CardTitle className="text-2xl" style={{ fontFamily: "Georgia, serif" }}>
+              <CardTitle className="text-2xl" >
                 Select Language
               </CardTitle>
               <CardDescription>

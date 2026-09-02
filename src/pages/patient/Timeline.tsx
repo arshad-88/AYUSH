@@ -89,7 +89,7 @@ export default function Timeline() {
               <Clock className="w-6 h-6 text-vintage-blue" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+              <h1 className="text-xl font-bold text-foreground" >
                 Medical Timeline
               </h1>
               <p className="text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ export default function Timeline() {
                                   <p className="text-xs text-muted-foreground font-medium">
                                     {displayDate}
                                   </p>
-                                  <h3 className="text-sm font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                                  <h3 className="text-sm font-bold text-foreground" >
                                     {event.title}
                                   </h3>
                                 </div>
@@ -166,7 +166,7 @@ export default function Timeline() {
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-sm font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                              <p className="text-sm font-bold text-foreground" >
                                 {doc.fileName || doc.filename || "Uploaded document"}
                               </p>
                               <p className="text-xs text-muted-foreground">Date unavailable</p>

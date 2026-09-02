@@ -340,7 +340,7 @@ export default function TouchModeInterview() {
                     <div>
                       <CardTitle
                         className="text-sm"
-                        style={{ fontFamily: "Georgia, serif" }}
+                        
                       >
                         Clinical Interview
                       </CardTitle>
@@ -477,7 +477,7 @@ export default function TouchModeInterview() {
                   <div>
                     <CardTitle
                       className="text-sm"
-                      style={{ fontFamily: "Georgia, serif" }}
+                      
                     >
                       Live Case Information
                     </CardTitle>

@@ -57,7 +57,7 @@ export default function DoctorLogin() {
               <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-blue to-vintage-teal flex items-center justify-center mb-4">
                 <Stethoscope className="w-7 h-7 text-white" />
               </div>
-              <CardTitle className="text-xl" style={{ fontFamily: "Georgia, serif" }}>
+              <CardTitle className="text-xl" >
                 Doctor Login
               </CardTitle>
               <CardDescription>

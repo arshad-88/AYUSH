@@ -76,7 +76,7 @@ export default function Landing() {
             {/* Headline */}
             <h1
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight"
-              style={{ fontFamily: "Georgia, serif" }}
+              
             >
               Pre-Consultation Intelligence
               <br />
@@ -135,25 +135,25 @@ export default function Landing() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="text-center p-3 rounded-lg bg-parchment">
-                  <p className="text-3xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                  <p className="text-3xl font-bold text-foreground" >
                     {opdStats.todaysOPD}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Today&apos;s OPD</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-urgent-red/5">
-                  <p className="text-3xl font-bold text-urgent-red" style={{ fontFamily: "Georgia, serif" }}>
+                  <p className="text-3xl font-bold text-urgent-red" >
                     {opdStats.highRisk}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">High Risk</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-priority-amber/5">
-                  <p className="text-3xl font-bold text-priority-amber" style={{ fontFamily: "Georgia, serif" }}>
+                  <p className="text-3xl font-bold text-priority-amber" >
                     {opdStats.priority}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Priority</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-routine-green/5">
-                  <p className="text-3xl font-bold text-routine-green" style={{ fontFamily: "Georgia, serif" }}>
+                  <p className="text-3xl font-bold text-routine-green" >
                     {opdStats.routine}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Routine</p>
@@ -170,7 +170,7 @@ export default function Landing() {
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2
               className="text-3xl sm:text-4xl font-bold text-foreground"
-              style={{ fontFamily: "Georgia, serif" }}
+              
             >
               How It Works
             </h2>
@@ -234,7 +234,7 @@ export default function Landing() {
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2
               className="text-3xl sm:text-4xl font-bold text-foreground"
-              style={{ fontFamily: "Georgia, serif" }}
+              
             >
               For Patients
             </h2>
@@ -299,7 +299,7 @@ export default function Landing() {
                 <div className="w-10 h-10 rounded-lg bg-vintage-teal/10 flex items-center justify-center mb-4">
                   <feature.icon className="w-5 h-5 text-vintage-teal" />
                 </div>
-                <h3 className="font-bold text-foreground mb-2" style={{ fontFamily: "Georgia, serif" }}>
+                <h3 className="font-bold text-foreground mb-2" >
                   {feature.title}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -317,7 +317,7 @@ export default function Landing() {
           <motion.div {...fadeInUp} className="text-center mb-12">
             <h2
               className="text-3xl sm:text-4xl font-bold text-foreground"
-              style={{ fontFamily: "Georgia, serif" }}
+              
             >
               For Doctors
             </h2>
@@ -382,7 +382,7 @@ export default function Landing() {
                 <div className="w-10 h-10 rounded-lg bg-vintage-blue/10 flex items-center justify-center mb-4">
                   <feature.icon className="w-5 h-5 text-vintage-blue" />
                 </div>
-                <h3 className="font-bold text-foreground mb-2" style={{ fontFamily: "Georgia, serif" }}>
+                <h3 className="font-bold text-foreground mb-2" >
                   {feature.title}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -400,7 +400,7 @@ export default function Landing() {
           <motion.div {...fadeInUp}>
             <h2
               className="text-3xl sm:text-4xl font-bold text-foreground mb-4"
-              style={{ fontFamily: "Georgia, serif" }}
+              
             >
               Ready to Experience MediKiosk?
             </h2>
@@ -438,7 +438,7 @@ export default function Landing() {
               <div className="w-7 h-7 rounded-md bg-gradient-to-br from-vintage-blue to-vintage-teal flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-sm" style={{ fontFamily: "Georgia, serif" }}>
+              <span className="font-bold text-sm" >
                 MediKiosk
               </span>
             </div>

@@ -142,7 +142,7 @@ export default function Triage() {
               <Brain className="w-6 h-6 text-vintage-blue" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+              <h1 className="text-xl font-bold text-foreground" >
                 AI-Assisted Triage
               </h1>
               <p className="text-xs text-muted-foreground">
@@ -206,7 +206,7 @@ export default function Triage() {
                                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
                                   Priority Assessment
                                 </p>
-                                <h2 className={`text-2xl font-bold ${config.color}`} style={{ fontFamily: "Georgia, serif" }}>
+                                <h2 className={`text-2xl font-bold ${config.color}`} >
                                   {triage.priority.toUpperCase()}
                                 </h2>
                               </div>
@@ -259,7 +259,7 @@ export default function Triage() {
               {explainability && (
                 <Card className="vintage-card">
                   <CardHeader>
-                    <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                    <CardTitle className="text-sm" >
                       Explainable AI — Factor Analysis
                     </CardTitle>
                   </CardHeader>

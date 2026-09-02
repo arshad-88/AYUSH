@@ -426,7 +426,7 @@ export default function DocumentUpload() {
               <FileText className="w-6 h-6 text-vintage-teal" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+              <h1 className="text-xl font-bold text-foreground" >
                 Document Intelligence
               </h1>
               <p className="text-xs text-muted-foreground">
@@ -487,7 +487,7 @@ export default function DocumentUpload() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="vintage-card">
                 <CardHeader>
-                  <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                  <CardTitle className="text-sm" >
                     Structured extraction
                   </CardTitle>
                 </CardHeader>
@@ -581,7 +581,7 @@ export default function DocumentUpload() {
           {uploadedDocs.length > 0 && (
             <Card className="vintage-card">
               <CardHeader>
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Uploaded Documents ({uploadedDocs.length})
                 </CardTitle>
               </CardHeader>

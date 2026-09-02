@@ -144,7 +144,7 @@ export default function PatientDetail() {
                     <User className="w-7 h-7 text-vintage-blue" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                    <h1 className="text-xl font-bold text-foreground" >
                       {name || "Patient"}
                     </h1>
                     <p className="text-sm text-muted-foreground">
@@ -182,7 +182,7 @@ export default function PatientDetail() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Brain className="w-4 h-4 text-vintage-teal" />
-                    <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                    <CardTitle className="text-sm" >
                       SOCRATES Assessment
                     </CardTitle>
                     <span className="text-[10px] text-muted-foreground">
@@ -212,7 +212,7 @@ export default function PatientDetail() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Leaf className="w-4 h-4 text-vintage-gold" />
-                    <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                    <CardTitle className="text-sm" >
                       AYUSH Assessment ({answeredAYUSH.length}/10)
                     </CardTitle>
                   </div>
@@ -242,7 +242,7 @@ export default function PatientDetail() {
                   <CardHeader>
                     <div className="flex items-center gap-2">
                       <Activity className="w-4 h-4 text-vintage-blue" />
-                      <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                      <CardTitle className="text-sm" >
                         Why This Priority?
                       </CardTitle>
                     </div>
@@ -268,7 +268,7 @@ export default function PatientDetail() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-vintage-teal" />
-                    <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                    <CardTitle className="text-sm" >
                       Documents ({documents.length})
                     </CardTitle>
                   </div>
@@ -294,7 +294,7 @@ export default function PatientDetail() {
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 text-priority-amber" />
-                    <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                    <CardTitle className="text-sm" >
                       Missing Information
                     </CardTitle>
                   </div>
@@ -322,7 +322,7 @@ export default function PatientDetail() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Doctor Verification
                 </CardTitle>
               </div>
@@ -406,7 +406,7 @@ export default function PatientDetail() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Link2 className="w-4 h-4 text-vintage-teal" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   FHIR / ABDM Integration Demo
                 </CardTitle>
               </div>

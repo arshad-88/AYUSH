@@ -211,7 +211,7 @@ export default function CaseSheet() {
                     <FileText className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                    <h1 className="text-xl font-bold text-foreground" >
                       Pre-Consultation Case Sheet
                     </h1>
                     <p className="text-xs text-muted-foreground">
@@ -235,7 +235,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Patient Information
                 </CardTitle>
               </div>
@@ -267,7 +267,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Chief Complaint
                 </CardTitle>
               </div>
@@ -284,7 +284,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Brain className="w-4 h-4 text-vintage-teal" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   SOCRATES Assessment
                 </CardTitle>
                 <span className="text-[10px] text-muted-foreground">
@@ -314,7 +314,7 @@ export default function CaseSheet() {
           {/* HPI and structured history */}
           <Card className="vintage-card">
             <CardHeader>
-              <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>History of Present Illness</CardTitle>
+              <CardTitle className="text-sm" >History of Present Illness</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-foreground">
               <p><strong>Chief complaint:</strong> {chiefComplaint || "Not provided"}</p>
@@ -327,7 +327,7 @@ export default function CaseSheet() {
 
           <Card className="vintage-card">
             <CardHeader>
-              <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>Medical History</CardTitle>
+              <CardTitle className="text-sm" >Medical History</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <p><strong>Past medical history:</strong> {clinicalState.pastMedicalHistory.join(", ") || "Not provided"}</p>
@@ -346,7 +346,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Leaf className="w-4 h-4 text-vintage-gold" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   AYUSH Assessment — Dashavidha Pariksha
                 </CardTitle>
                 <span className="text-[10px] text-muted-foreground">
@@ -378,7 +378,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <FileCheck className="w-4 h-4 text-vintage-teal" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Document Findings
                 </CardTitle>
               </div>
@@ -417,7 +417,7 @@ export default function CaseSheet() {
 
           <Card className="vintage-card">
             <CardHeader>
-              <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>Ahara-Vihara</CardTitle>
+              <CardTitle className="text-sm" >Ahara-Vihara</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               {(["diet", "sleep", "bowelHabits", "dailyRoutine", "substances"] as const).map((field) => (
@@ -432,7 +432,7 @@ export default function CaseSheet() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-priority-amber" />
-                  <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                  <CardTitle className="text-sm" >
                     Case Completeness Engine
                   </CardTitle>
                 </div>
@@ -474,7 +474,7 @@ export default function CaseSheet() {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-vintage-blue" />
-                  <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                  <CardTitle className="text-sm" >
                     AI-Assisted Priority
                   </CardTitle>
                 </div>
@@ -505,7 +505,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Doctor Verification
                 </CardTitle>
               </div>
@@ -530,7 +530,7 @@ export default function CaseSheet() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Link2 className="w-4 h-4 text-vintage-teal" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   FHIR / ABDM Integration
                 </CardTitle>
               </div>

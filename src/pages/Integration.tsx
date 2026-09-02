@@ -88,7 +88,7 @@ export default function Integration() {
               <Link2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+              <h1 className="text-xl font-bold text-foreground" >
                 FHIR / ABDM Integration
               </h1>
               <p className="text-xs text-muted-foreground">
@@ -128,7 +128,7 @@ export default function Integration() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   FHIR R4 Bundle
                 </CardTitle>
               </div>
@@ -193,7 +193,7 @@ export default function Integration() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-vintage-teal" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   ABDM / ABHA Integration
                 </CardTitle>
               </div>
@@ -256,7 +256,7 @@ export default function Integration() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Integration Architecture
                 </CardTitle>
               </div>

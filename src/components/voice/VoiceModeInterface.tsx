@@ -330,7 +330,7 @@ export default function VoiceModeInterface() {
             <Card className="vintage-card flex-1 flex flex-col min-h-[600px]">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg" style={{ fontFamily: "Georgia, serif" }}>
+                  <CardTitle className="text-lg" >
                     Voice Interview
                   </CardTitle>
                   <span className="text-xs font-semibold text-vintage-blue">
@@ -421,7 +421,7 @@ export default function VoiceModeInterface() {
           <div className="lg:col-span-2 flex flex-col">
             <Card className="vintage-card flex-1 flex flex-col">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Live SOCRATES
                 </CardTitle>
               </CardHeader>

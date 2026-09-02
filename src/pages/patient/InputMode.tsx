@@ -44,7 +44,7 @@ export default function InputMode() {
         >
           <Card className="vintage-card flex-1">
             <CardHeader className="text-center pt-8 pb-4">
-              <CardTitle className="text-2xl" style={{ fontFamily: "Georgia, serif" }}>
+              <CardTitle className="text-2xl" >
                 How would you like to answer?
               </CardTitle>
               <CardDescription>

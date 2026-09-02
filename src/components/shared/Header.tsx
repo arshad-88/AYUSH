@@ -37,7 +37,7 @@ export function Header() {
               <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-lg font-bold tracking-tight text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+              <span className="text-lg font-bold tracking-tight text-foreground" >
                 MediKiosk
               </span>
               <span className="hidden sm:inline text-[10px] ml-1.5 text-muted-foreground uppercase tracking-widest">

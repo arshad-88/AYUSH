@@ -74,7 +74,7 @@ export default function Technology() {
           <div className="text-center">
             <h1
               className="text-3xl sm:text-4xl font-bold text-foreground"
-              style={{ fontFamily: "Georgia, serif" }}
+              
             >
               MediKiosk — Architecture
             </h1>
@@ -96,7 +96,7 @@ export default function Technology() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm tracking-wide uppercase" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm tracking-wide uppercase" >
                   System Status
                 </CardTitle>
               </div>
@@ -129,7 +129,7 @@ export default function Technology() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   System Architecture
                 </CardTitle>
               </div>
@@ -295,7 +295,7 @@ export default function Technology() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-vintage-blue" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Technology Stack
                 </CardTitle>
               </div>
@@ -328,7 +328,7 @@ export default function Technology() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-vintage-green" />
-                <CardTitle className="text-sm" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-sm" >
                   Key Benefits
                 </CardTitle>
               </div>

@@ -54,7 +54,7 @@ export default function Consent() {
               <div className="mx-auto w-14 h-14 rounded-xl bg-vintage-blue/10 flex items-center justify-center mb-4">
                 <ShieldAlert className="w-7 h-7 text-vintage-blue" />
               </div>
-              <CardTitle className="text-2xl" style={{ fontFamily: "Georgia, serif" }}>
+              <CardTitle className="text-2xl" >
                 Patient Consent
               </CardTitle>
               <CardDescription>

@@ -109,7 +109,7 @@ export default function PatientDashboard() {
             <Card className="vintage-card mb-6">
               <CardHeader className="flex flex-row items-start justify-between">
                 <div>
-                  <CardTitle style={{ fontFamily: "Georgia, serif" }}>
+                  <CardTitle >
                     Consultation Details
                   </CardTitle>
                   <CardDescription>{consultation.date}</CardDescription>
@@ -214,7 +214,7 @@ export default function PatientDashboard() {
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between gap-6">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-foreground mb-1" style={{ fontFamily: "Georgia, serif" }}>
+                    <h1 className="text-3xl font-bold text-foreground mb-1" >
                       Welcome, {name || "Patient"}
                     </h1>
                     <div className="space-y-2 text-sm text-muted-foreground">
@@ -273,7 +273,7 @@ export default function PatientDashboard() {
 
           {/* PREVIOUS CONSULTATIONS */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" style={{ fontFamily: "Georgia, serif" }}>
+            <h2 className="text-xl font-bold text-foreground mb-4" >
               <Calendar className="w-5 h-5 inline mr-2" />
               Previous Consultations
             </h2>
@@ -326,7 +326,7 @@ export default function PatientDashboard() {
 
           {/* CLINICAL HISTORY */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" style={{ fontFamily: "Georgia, serif" }}>
+            <h2 className="text-xl font-bold text-foreground mb-4" >
               <FileText className="w-5 h-5 inline mr-2" />
               Clinical History
             </h2>
@@ -348,7 +348,7 @@ export default function PatientDashboard() {
 
           {/* AYUSH PROFILE */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" style={{ fontFamily: "Georgia, serif" }}>
+            <h2 className="text-xl font-bold text-foreground mb-4" >
               <Leaf className="w-5 h-5 inline mr-2" />
               AYUSH Profile
             </h2>
@@ -380,7 +380,7 @@ export default function PatientDashboard() {
 
           {/* DOCUMENTS */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" style={{ fontFamily: "Georgia, serif" }}>
+            <h2 className="text-xl font-bold text-foreground mb-4" >
               <FileText className="w-5 h-5 inline mr-2" />
               Documents
             </h2>
@@ -403,7 +403,7 @@ export default function PatientDashboard() {
 
           {/* TIMELINE */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4" style={{ fontFamily: "Georgia, serif" }}>
+            <h2 className="text-xl font-bold text-foreground mb-4" >
               <Calendar className="w-5 h-5 inline mr-2" />
               Clinical Timeline
             </h2>
@@ -434,7 +434,7 @@ export default function PatientDashboard() {
           {/* TRIAGE */}
           {triage && (
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-foreground mb-4" style={{ fontFamily: "Georgia, serif" }}>
+              <h2 className="text-xl font-bold text-foreground mb-4" >
                 <AlertTriangle className="w-5 h-5 inline mr-2" />
                 Triage Result
               </h2>

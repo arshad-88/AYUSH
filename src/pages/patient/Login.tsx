@@ -170,7 +170,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-blue to-vintage-teal flex items-center justify-center mb-4">
                   <FileText className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-2xl" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-2xl" >
                   Patient Login
                 </CardTitle>
                 <CardDescription>
@@ -284,7 +284,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-blue to-blue-600 flex items-center justify-center mb-4">
                   <IdCard className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-xl" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-xl" >
                   Aadhaar Verification
                 </CardTitle>
                 <CardDescription>Enter your Aadhaar number (last 4 digits will not be stored)</CardDescription>
@@ -378,7 +378,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-blue to-blue-600 flex items-center justify-center mb-4">
                   <FileText className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-xl" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-xl" >
                   Verify OTP
                 </CardTitle>
                 <CardDescription>
@@ -459,7 +459,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-teal to-teal-600 flex items-center justify-center mb-4">
                   <Shield className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-xl" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-xl" >
                   ABHA Login
                 </CardTitle>
                 <CardDescription>Enter your ABHA number or ABHA address</CardDescription>
@@ -534,7 +534,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-gold to-yellow-600 flex items-center justify-center mb-4">
                   <Phone className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-xl" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-xl" >
                   Mobile OTP
                 </CardTitle>
                 <CardDescription>Enter your 10-digit mobile number</CardDescription>
@@ -610,7 +610,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-14 h-14 rounded-xl bg-gradient-to-br from-vintage-gold to-yellow-600 flex items-center justify-center mb-4">
                   <FileText className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-xl" style={{ fontFamily: "Georgia, serif" }}>
+                <CardTitle className="text-xl" >
                   Verify OTP
                 </CardTitle>
                 <CardDescription>
@@ -691,7 +691,7 @@ export default function PatientLogin() {
                 <div className="mx-auto w-16 h-16 rounded-full bg-vintage-green/10 flex items-center justify-center mb-4">
                   <CheckCircle className="w-8 h-8 text-vintage-green" />
                 </div>
-                <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: "Georgia, serif" }}>
+                <h2 className="text-xl font-bold text-foreground" >
                   Identity Verified
                 </h2>
                 <p className="text-sm text-muted-foreground">
