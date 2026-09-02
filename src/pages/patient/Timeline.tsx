@@ -28,7 +28,7 @@ const typeConfig: Record<string, { icon: typeof Stethoscope; color: string; bg: 
 
 export default function Timeline() {
   const navigate = useNavigate();
-  const { timeline, documents, setStep, clinicalState, id: patientId } = usePatientStore();
+  const { timeline, documents, setStep, id: patientId } = usePatientStore();
 
   // Hydrate timeline from Convex
   const convexTimeline = useQuery(
@@ -41,22 +41,9 @@ export default function Timeline() {
     }
   }, [convexTimeline]);
 
-  const derivedDocumentTimeline = (documents ?? []).flatMap((doc) => {
-    const dateValue = doc.extractedData?.date;
-    if (!dateValue || dateValue === "Date unavailable" || dateValue === "Not detected") return [];
-    const facts = (doc.documentFacts ?? []).filter((fact) => fact.verified || fact.status === "confirmed" || fact.status === "edited");
-    if (facts.length === 0) return [];
-    return facts.slice(0, 3).map((fact) => ({
-      id: `${doc.id}-${fact.field}`,
-      date: dateValue,
-      title: fact.field,
-      description: fact.value,
-      type: fact.field.toLowerCase().includes("med") ? "medication" : fact.field.toLowerCase().includes("lab") ? "lab" : "observation",
-      source: fact.source,
-    }));
-  });
-
-  const effectiveTimeline = [...timeline, ...derivedDocumentTimeline];
+  // Timeline events are now persisted in Convex; no longer derived from documents.
+  // The store's timeline is hydrated from Convex in the useEffect above.
+  const effectiveTimeline = timeline;
 
   const parseTimelineDate = (value?: string) => {
     if (!value || value === "Date unavailable" || value === "Not detected") return null;

@@ -27,6 +27,31 @@ export const getQueueByStatus = query({
   },
 });
 
+export const getEnrichedQueue = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return null;
+    const queueItems = await ctx.db
+      .query("doctorQueue")
+      .withIndex("by_status", (q) => q.eq("status", "waiting"))
+      .collect();
+    const enriched = await Promise.all(queueItems.map(async (item) => {
+      const patient = await ctx.db.get(item.patientId);
+      const caseSheet = await ctx.db.get(item.caseSheetId);
+      const chiefComplaint = caseSheet?.data?.patientReported?.chiefComplaint || "No complaint";
+      return {
+        ...item,
+        patientName: patient?.name || "Unknown",
+        patientAge: patient?.age || 0,
+        patientGender: patient?.gender || "Unknown",
+        chiefComplaint,
+      };
+    }));
+    return enriched;
+  },
+});
+
 export const enqueueCaseSheet = mutation({
   args: {
     caseSheetId: v.id("caseSheets"),

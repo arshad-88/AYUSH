@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { usePatientStore } from "@/store/patientStore";
+import { usePatientStore, PatientState } from "@/store/patientStore";
 import { useDoctorStore, QueuePatient } from "@/store/doctorStore";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Header } from "@/components/shared/Header";
 import { PriorityBadge } from "@/components/shared/PriorityBadge";
 import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
-import { opdStats, demoScenarios } from "@/data/demoData";
-import { queueService } from "@/services/queue/queueService";
+import { opdStats } from "@/data/demoData";
 import {
   Stethoscope,
   Users,
@@ -27,95 +28,106 @@ import {
 type SortBy = "priority" | "waitTime" | "token";
 const priorityOrder: Record<string, number> = { urgent: 0, priority: 1, routine: 2 };
 
-// Seed demo patients into queue if empty (for self-contained demo)
-function seedDemoQueueIfEmpty() {
-  const queue = useDoctorStore.getState().queue;
-  if (queue.length === 0) {
-    demoScenarios.forEach((scenario, i) => {
-      const patientState = usePatientStore.getState();
-      // Build a minimal patient state snapshot for each scenario
-      const snapshot: any = {
-        id: scenario.id,
-        name: scenario.patient.name,
-        age: scenario.patient.age,
-        gender: scenario.patient.gender,
-        language: scenario.patient.language,
-        mobileNumber: scenario.patient.mobileNumber,
-        abhaId: scenario.patient.abhaId,
-        chiefComplaint: scenario.history.chiefComplaint,
-        socrates: {
-          site: scenario.history.site,
-          onset: scenario.history.onset,
-          character: scenario.history.character,
-          radiation: scenario.history.radiation,
-          associatedSymptoms: scenario.history.associatedSymptoms,
-          timing: scenario.history.timing,
-          exacerbatingFactors: scenario.history.exacerbatingFactors,
-          relievingFactors: scenario.history.relievingFactors,
-          severity: scenario.history.severity,
-        },
-        ayush: scenario.ayush,
-        documents: scenario.documents,
-        timeline: scenario.timeline,
-        triage: scenario.triage,
-        interviewComplete: true,
-        ayushComplete: true,
-        consentGiven: true,
-        isAuthenticated: true,
-        isDoctor: false,
-        verification: { status: "pending" },
-      };
-      useDoctorStore.getState().addPatientToQueue({
-        id: scenario.id,
-        name: scenario.patient.name,
-        age: scenario.patient.age,
-        gender: scenario.patient.gender,
-        chiefComplaint: scenario.history.chiefComplaint,
-        priority: scenario.expectedPriority,
-        timestamp: new Date(Date.now() - (3 - i) * 8 * 60 * 1000).toISOString(),
-        status: "waiting",
-        patientStateSnapshot: snapshot,
-      });
-    });
-  }
-}
+  // Demo seeding removed; queue comes from Convex.
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
   const { setPatient } = usePatientStore();
-  const { queue, clearQueue } = useDoctorStore();
+  const { queue: zustandQueue, clearQueue } = useDoctorStore();
   const [sortBy, setSortBy] = useState<SortBy>("priority");
 
-  // Seed demo data if queue is empty
-  seedDemoQueueIfEmpty();
+  // Load queue from Convex
+  const convexQueue = useQuery(api.doctorQueue.getEnrichedQueue, {});
+  const updateQueueStatus = useMutation(api.doctorQueue.updateQueueStatus);
 
-  const waitingPatients = queue.filter(p => p.status === "waiting");
+  // Hydrate Zustand queue from Convex when data arrives
+  useEffect(() => {
+    if (convexQueue !== undefined && convexQueue.length > 0) {
+      // Convert to QueuePatient format for Zustand (for backward compat)
+      const queuePatients: QueuePatient[] = convexQueue.map((item: any) => ({
+        id: item._id,
+        name: item.patientName,
+        age: item.patientAge,
+        gender: item.patientGender,
+        chiefComplaint: item.chiefComplaint,
+        priority: item.priority,
+        timestamp: new Date(item.queuedAt).toISOString(),
+        status: item.status,
+        patientStateSnapshot: {
+          // Minimal snapshot; will be filled when clicking
+          name: item.patientName,
+          age: item.patientAge,
+          gender: item.patientGender,
+          chiefComplaint: item.chiefComplaint,
+          // other fields default
+        } as PatientState,
+      }));
+      // Replace Zustand queue
+      useDoctorStore.setState({ queue: queuePatients });
+    }
+  }, [convexQueue]);
+
+  const waitingPatients = convexQueue ? convexQueue : [];
 
   const sortedPatients = [...waitingPatients].sort((a, b) => {
     if (sortBy === "priority") return priorityOrder[a.priority] - priorityOrder[b.priority];
     if (sortBy === "waitTime") {
-      const waitA = Date.now() - new Date(a.timestamp).getTime();
-      const waitB = Date.now() - new Date(b.timestamp).getTime();
-      return waitB - waitA; // Longer wait first
+      // Use queuedAt timestamps for sorting; no Date.now in render
+      return b.queuedAt - a.queuedAt; // longer wait first (older)
     }
-    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+    return a.queuedAt - b.queuedAt; // FIFO
   });
 
   const urgentCount = waitingPatients.filter((p) => p.priority === "urgent").length;
   const priorityCount = waitingPatients.filter((p) => p.priority === "priority").length;
   const routineCount = waitingPatients.filter((p) => p.priority === "routine").length;
 
-  const handlePatientClick = (queuePatient: QueuePatient) => {
+  const handlePatientClick = async (queueItem: any) => {
     // Load the patient's full state snapshot into the patient store
-    setPatient({
-      ...queuePatient.patientStateSnapshot,
-    });
-    useDoctorStore.getState().updatePatientStatus(queuePatient.id, "in-consultation");
+    // For now, we use the Zustand snapshot if available, or create a minimal one
+    const zustandPatient = zustandQueue.find((p: any) => p.id === queueItem._id);
+    if (zustandPatient) {
+      setPatient({
+        ...zustandPatient.patientStateSnapshot,
+      });
+    } else {
+      // Fallback: create minimal snapshot from queue data
+      setPatient({
+        name: queueItem.patientName,
+        age: queueItem.patientAge,
+        gender: queueItem.patientGender,
+        chiefComplaint: queueItem.chiefComplaint,
+        // Other fields will be empty; doctor detail page will show what's available
+      });
+    }
+    // Update status in Convex and Zustand
+    try {
+      await updateQueueStatus({
+        queueId: queueItem._id,
+        status: "in-consultation",
+      });
+      useDoctorStore.getState().updatePatientStatus(queueItem._id, "in-consultation");
+    } catch (error) {
+      console.error("Failed to update queue status:", error);
+    }
     navigate("/doctor/patient");
   };
 
-  const getWaitMinutes = (timestamp: string) => {
-    return Math.round((Date.now() - new Date(timestamp).getTime()) / 60000);
+  // Compute wait minutes in an effect to avoid impure Date.now during render
+  const [waitTimes, setWaitTimes] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (convexQueue && convexQueue.length > 0) {
+      const now = Date.now();
+      const newWaitTimes: Record<string, number> = {};
+      convexQueue.forEach((item: any) => {
+        newWaitTimes[item._id] = Math.round((now - item.queuedAt) / 60000);
+      });
+      setWaitTimes(newWaitTimes);
+    }
+  }, [convexQueue]);
+  const formatWaitTime = (itemId: string) => {
+    const minutes = waitTimes[itemId];
+    return minutes !== undefined ? minutes + 'm' : '--';
   };
 
   return (
@@ -144,10 +156,13 @@ export default function DoctorDashboard() {
             </div>
             <div className="flex items-center gap-2">
               <DisclaimerBanner type="demo" className="flex-1 max-w-xs" />
-              <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => clearQueue()}>
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Clear Queue
-              </Button>
+          <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => {
+            // Clear queue in Zustand only; Convex queue persists.
+            clearQueue();
+          }}>
+            <RefreshCw className="w-3 h-3 mr-1" />
+            Clear Local Queue
+          </Button>
             </div>
           </div>
 
@@ -228,7 +243,7 @@ export default function DoctorDashboard() {
                 <div className="space-y-3">
                   {sortedPatients.map((patient, i) => (
                     <motion.div
-                      key={patient.id}
+                      key={patient._id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05 }}
@@ -256,9 +271,9 @@ export default function DoctorDashboard() {
                           {/* Patient Info */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="text-sm font-bold text-foreground">{patient.name}</p>
+                              <p className="text-sm font-bold text-foreground">{patient.patientName}</p>
                               <span className="text-xs text-muted-foreground">
-                                {patient.age}y, {patient.gender}
+                                {patient.patientAge}y, {patient.patientGender}
                               </span>
                             </div>
                             <p className="text-xs text-muted-foreground truncate">
@@ -269,11 +284,11 @@ export default function DoctorDashboard() {
                           {/* Wait Time */}
                           <div className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground">
                             <Globe className="w-3 h-3" />
-                            {patient.patientStateSnapshot?.language || "—"}
+                            {patient.patientName ? patient.patientName : "—"}
                           </div>
 
                           <div className="text-right flex-shrink-0">
-                            <p className="text-xs font-bold text-foreground">{getWaitMinutes(patient.timestamp)}m</p>
+                            <p className="text-xs font-bold text-foreground">{formatWaitTime(patient._id)}</p>
                             <p className="text-[10px] text-muted-foreground">wait</p>
                           </div>
 

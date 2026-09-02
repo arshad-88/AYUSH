@@ -103,13 +103,7 @@ export default function CaseSheet() {
   const persistAllData = async () => {
     if (!consultationId || !patientId) return;
 
-    // Save AYUSH if not already saved - use direct query instead of hook
-    const existingAYUSH = await ctx?.db?.query?.(...); // This is not valid; we'll use a simpler approach.
-    // Since we can't call hooks inside functions, we'll rely on the fact that
-    // AYUSH and triage should already be saved by their respective pages.
-    // We'll skip the checks and just attempt to save if not already present,
-    // but we can't query within this function. We'll trust the backend duplicate protection.
-    // So we'll just call create mutations; they'll fail if already exist.
+    // Save AYUSH if not already saved - rely on backend duplicate protection
     try {
       await createAYUSH({
         patientId: patientId as any,
