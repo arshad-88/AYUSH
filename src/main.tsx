@@ -8,6 +8,9 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router";
 import { usePatientStore } from "@/store/patientStore";
 import "./index.css";
+import { ConvexProvider } from "convex/react";
+import convex from "./lib/convex";
+import { ConvexSync } from "./components/ConvexSync";
 
 // Lazy load route components
 const Landing = lazy(() => import("./pages/Landing.tsx"));
@@ -153,56 +156,59 @@ function RouteSyncer() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
-      <ToolbarErrorBoundary>
-        <VlyToolbar />
-      </ToolbarErrorBoundary>
-      <MockAuthProvider>
-        <BrowserRouter>
-          <RouteSyncer />
-          <DemoSelector />
-          <Suspense fallback={<RouteLoading />}>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
-              <Route path="/technology" element={<Technology />} />
-              <Route path="/integration" element={<Integration />} />
+      <ConvexProvider client={convex}>
+        <ToolbarErrorBoundary>
+          <VlyToolbar />
+        </ToolbarErrorBoundary>
+        <MockAuthProvider>
+          <BrowserRouter>
+            <ConvexSync />
+            <RouteSyncer />
+            <DemoSelector />
+            <Suspense fallback={<RouteLoading />}>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<AuthPage redirectAfterAuth="/dashboard" />} />
+                <Route path="/technology" element={<Technology />} />
+                <Route path="/integration" element={<Integration />} />
 
-              {/* Patient routes */}
-              <Route path="/patient/login" element={<PatientGuestGate><PatientLogin /></PatientGuestGate>} />
-              <Route path="/patient/dashboard" element={<PatientAuthGate><PatientDashboard /></PatientAuthGate>} />
-              <Route path="/patient/consent" element={<PatientAuthGate><Consent /></PatientAuthGate>} />
-              <Route path="/patient/language" element={<PatientAuthGate><Language /></PatientAuthGate>} />
-              <Route path="/patient/input-mode" element={<PatientAuthGate><InputMode /></PatientAuthGate>} />
-              <Route path="/patient/interview" element={<PatientAuthGate><Interview /></PatientAuthGate>} />
-              <Route path="/patient/assessment" element={<PatientAuthGate><Assessment /></PatientAuthGate>} />
-              <Route path="/patient/document" element={<PatientAuthGate><DocumentUpload /></PatientAuthGate>} />
-              <Route path="/patient/timeline" element={<PatientAuthGate><Timeline /></PatientAuthGate>} />
-              <Route path="/patient/triage" element={<PatientAuthGate><Triage /></PatientAuthGate>} />
-              <Route path="/patient/casesheet" element={<PatientAuthGate><CaseSheet /></PatientAuthGate>} />
+                {/* Patient routes */}
+                <Route path="/patient/login" element={<PatientGuestGate><PatientLogin /></PatientGuestGate>} />
+                <Route path="/patient/dashboard" element={<PatientAuthGate><PatientDashboard /></PatientAuthGate>} />
+                <Route path="/patient/consent" element={<PatientAuthGate><Consent /></PatientAuthGate>} />
+                <Route path="/patient/language" element={<PatientAuthGate><Language /></PatientAuthGate>} />
+                <Route path="/patient/input-mode" element={<PatientAuthGate><InputMode /></PatientAuthGate>} />
+                <Route path="/patient/interview" element={<PatientAuthGate><Interview /></PatientAuthGate>} />
+                <Route path="/patient/assessment" element={<PatientAuthGate><Assessment /></PatientAuthGate>} />
+                <Route path="/patient/document" element={<PatientAuthGate><DocumentUpload /></PatientAuthGate>} />
+                <Route path="/patient/timeline" element={<PatientAuthGate><Timeline /></PatientAuthGate>} />
+                <Route path="/patient/triage" element={<PatientAuthGate><Triage /></PatientAuthGate>} />
+                <Route path="/patient/casesheet" element={<PatientAuthGate><CaseSheet /></PatientAuthGate>} />
 
-              {/* Doctor routes */}
-              <Route path="/doctor/login" element={<DoctorLogin />} />
-              <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-              <Route path="/doctor/patient" element={<PatientDetail />} />
+                {/* Doctor routes */}
+                <Route path="/doctor/login" element={<DoctorLogin />} />
+                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+                <Route path="/doctor/patient" element={<PatientDetail />} />
 
-              {/* Protected routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <RequireAuth>
-                    <Dashboard />
-                  </RequireAuth>
-                }
-              />
+                {/* Protected routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <RequireAuth>
+                      <Dashboard />
+                    </RequireAuth>
+                  }
+                />
 
-              {/* Fallback */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-        <Toaster />
-      </MockAuthProvider>
+                {/* Fallback */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+          <Toaster />
+        </MockAuthProvider>
+      </ConvexProvider>
     </RootErrorBoundary>
   </StrictMode>,
 );
