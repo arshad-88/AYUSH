@@ -35,6 +35,7 @@ import {
   RadialGauge,
   RingProgress,
   StatusBar,
+  HumanPainModel,
 } from "@/components/scientific";
 
 const socratesLabels: Record<string, string> = {
@@ -280,6 +281,33 @@ export default function CaseSheet() {
                 <p className="text-sm font-semibold mt-1 text-teal-400">{abhaId || "—"}</p>
               </div>
             </div>
+          </div>
+
+          {/* 3D Pain Visualization */}
+          <div className="lab-card lab-card-accent p-6 relative overflow-hidden">
+            <div className="absolute top-3 right-3">
+              <StatusBar latency="42ms" sessionId="PAIN-VIZ" />
+            </div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg bg-red-urgent/15 border border-red-urgent/30 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-red-critical" strokeWidth={1.6} />
+              </div>
+              <div>
+                <h3 className="font-bold tracking-tight-x">Pain Localization</h3>
+                <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
+                  3D BODY MAP · POST-ASSESSMENT
+                </span>
+              </div>
+            </div>
+            <div className="rounded-xl overflow-hidden bg-bio-base/40 border border-red-urgent/15">
+              <HumanPainModel
+                clinicalState={clinicalState}
+                className="h-[400px]"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Pain regions highlighted based on your assessment responses. Interact with the model to explore.
+            </p>
           </div>
 
           {/* Chief Complaint */}

@@ -31,7 +31,7 @@ import {
 import {
   BiomarkerBar,
   EkgWave,
-  AnatomicalHeart,
+  InteractiveHeart,
   StatusBar,
   BarChart,
   AreaSparkline,
@@ -179,7 +179,7 @@ export default function Landing() {
               className="relative aspect-square max-w-[620px] mx-auto w-full"
             >
               <div className="absolute inset-0 bg-gradient-radial from-trust-500/20 via-transparent to-transparent blur-3xl" />
-              <AnatomicalHeart className="absolute inset-0 z-0" size={620} />
+              <InteractiveHeart className="absolute inset-0 z-0" size={620} />
 
               {/* Floating data panels — z-10 so they layer cleanly above the
                   heart asset without any stacking-context surprises during
@@ -695,10 +695,10 @@ export default function Landing() {
               </div>
               <div className="text-left">
                 <div className="font-bold text-sm tracking-tight-x">
-                  MediKiosk<span className="text-trust-400">.</span>AI
+                  AYUSH<span className="text-trust-400">-</span>AI
                 </div>
                 <div className="data-figure text-[10px] text-muted-foreground tracking-widest">
-                  SMART INDIA HACKATHON 2026
+                  AYUSH-AI · SMART INDIA HACKATHON 2026
                 </div>
               </div>
             </div>

@@ -46,7 +46,7 @@ export class TesseractOcrService implements OcrService {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas is not available in this browser context.");
 
-    const scale = Math.max(2, 1600 / Math.max(image.width, image.height));
+    const scale = Math.max(3, 2400 / Math.max(image.width, image.height));
     const width = Math.round(image.width * scale);
     const height = Math.round(image.height * scale);
     canvas.width = width;
@@ -181,6 +181,8 @@ export class TesseractOcrService implements OcrService {
     if (options.psm != null) {
       (tessOptions as Record<string, unknown>).tessedit_pageseg_mode = String(options.psm);
     }
+    // Increase DPI hint to help Tesseract segment handwriting better
+    (tessOptions as Record<string, unknown>).tessedit_dpi = "300";
 
     // Tesseract's TypeScript types don't expose PSM/whitelist on WorkerOptions,
     // so we cast through `unknown` to apply the runtime parameters.
@@ -195,8 +197,8 @@ export class TesseractOcrService implements OcrService {
     if (!text) return Number.NEGATIVE_INFINITY;
 
     // Medication hint boost — words that look like drug fragments.
-    const drugHintRe = /\b(\d+\s?mg|\d+\s?mcg|Tab|Cap|Syr|Rx|OD|BD|TID|QID|HS|PRN|am|pm)\b/i;
-    const drugHint = drugHintRe.test(text) ? 15 : 0;
+    const drugHintRe = /\b(\d+\s?mg|\d+\s?mcg|\d+\s?ml|Tab|Cap|Syr|Rx|OD|BD|TID|QID|HS|PRN|am|pm|daily|twice|times|before|after|meal|bedtime|empty stomach|with food)\b/i;
+    const drugHint = drugHintRe.test(text) ? 20 : 0;
 
     // Penalize pure-noise lines.
     const letters = (text.match(/[A-Za-z]/g) || []).length;
@@ -215,16 +217,17 @@ export class TesseractOcrService implements OcrService {
     const invertedCanvas = this.invertedAdaptive(baseCanvas);
 
     const medWhitelist =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-/() mgmcgODBDTIDQIDHSPRNTabcapsyrR×:;";
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-/() mgmcgODBDTIDQIDHSPRNTabcapsyrR×:;@#";
     const baseWhitelist =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-/()×:;";
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,-/()×:;@#";
 
     const candidates = [
-      { canvas: enhancedCanvas, psm: 6, whitelist: baseWhitelist, label: "enhanced" },
       { canvas: binaryCanvas, psm: 6, whitelist: medWhitelist, label: "binary-med" },
+      { canvas: enhancedCanvas, psm: 6, whitelist: baseWhitelist, label: "enhanced" },
       { canvas: binaryCanvas, psm: 11, whitelist: baseWhitelist, label: "binary-psm11" },
       { canvas: invertedCanvas, psm: 6, whitelist: medWhitelist, label: "inverted-med" },
       { canvas: baseCanvas, psm: 6, whitelist: baseWhitelist, label: "plain" },
+      { canvas: enhancedCanvas, psm: 4, whitelist: medWhitelist, label: "enhanced-psm4" },
     ];
 
     let bestResult: Tesseract.RecognizeResult | null = null;

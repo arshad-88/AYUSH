@@ -21,8 +21,8 @@ import {
  * No real Aadhaar/ABHA data is persisted as patient ID.
  */
 
-const STORAGE_KEY_AUTH = "medikiosk_demo_auth";
-const STORAGE_KEY_PENDING_AADHAAR = "medikiosk_demo_pending_aadhaar";
+const STORAGE_KEY_AUTH = "ayushai_demo_auth";
+const STORAGE_KEY_PENDING_AADHAAR = "ayushai_demo_pending_aadhaar";
 const DEMO_OTP = "123456";
 
 // Demo patient data for linked dependents

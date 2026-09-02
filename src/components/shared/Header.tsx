@@ -43,10 +43,10 @@ export function Header() {
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-base font-bold tracking-tight-x">
-                MediKiosk<span className="text-trust-400">.</span>AI
+                AYUSH<span className="text-trust-400">-</span>AI
               </span>
               <span className="data-figure text-[9px] text-muted-foreground tracking-widest">
-                v1.0 · CLINICAL OS
+                AYUSH-AI · CLINICAL OS
               </span>
             </div>
           </div>

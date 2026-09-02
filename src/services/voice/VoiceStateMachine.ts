@@ -10,6 +10,7 @@ export type VoiceState =
   | "QUESTION_READY" // Next question available, ready to speak
   | "SPEAKING"       // TTS is currently speaking
   | "LISTENING"      // ASR is listening for patient response
+  | "NO_SPEECH"      // ASR ran but no speech was detected — retry or exit
   | "PROCESSING"     // Processing patient answer through clinical engine
   | "ERROR"          // Error state
   | "COMPLETED";     // Interview completed
@@ -76,7 +77,8 @@ export class VoiceStateMachine {
       IDLE: ["QUESTION_READY", "LISTENING", "SPEAKING", "PROCESSING", "COMPLETED", "IDLE"],
       QUESTION_READY: ["SPEAKING", "IDLE", "ERROR", "COMPLETED"],
       SPEAKING: ["LISTENING", "IDLE", "ERROR"], // Must not go to PROCESSING directly
-      LISTENING: ["PROCESSING", "IDLE", "ERROR"],
+      LISTENING: ["PROCESSING", "IDLE", "ERROR", "NO_SPEECH"],
+      NO_SPEECH: ["LISTENING", "QUESTION_READY", "IDLE", "ERROR"],
       PROCESSING: ["QUESTION_READY", "IDLE", "ERROR", "COMPLETED"],
       ERROR: ["QUESTION_READY", "IDLE", "LISTENING"],
       COMPLETED: ["IDLE"],

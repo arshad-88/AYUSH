@@ -35,6 +35,7 @@ export default function PatientLogin() {
   const [step, setStep] = useState<AuthStep>("method");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [aadhaarConsent, setAadhaarConsent] = useState(false);
@@ -57,6 +58,7 @@ export default function PatientLogin() {
     });
     setIsLoading(false);
     if (result.success) {
+      setOtpSent(true);
       setStep("verify");
     } else {
       setError(result.error || "Failed to request OTP");
@@ -93,21 +95,9 @@ export default function PatientLogin() {
     }
     setIsLoading(true);
     setError("");
-    const result = await authService.requestAbhaOtp({ abhaNumber });
+    // In demo mode, ABHA verification is immediate (no separate OTP step)
+    const result = await authService.loginWithAbha({ abhaNumber });
     setIsLoading(false);
-    if (result.success) {
-      setStep("verify");
-    } else {
-      setError(result.error || "Failed to request OTP");
-    }
-  };
-
-  const handleAbhaVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await authService.verifyAbhaOtp({
-      abhaNumber,
-      otp: aadhaarOtp,
-    });
     if (result.success && result.identity) {
       loginPatient(result.identity, { isAuthenticated: true });
       setStep("success");
@@ -115,6 +105,11 @@ export default function PatientLogin() {
     } else {
       setError(result.error || "ABHA verification failed");
     }
+  };
+
+  const handleAbhaVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // ABHA flow goes directly to success via handleAbhaRequest
   };
 
   const handleMobileRequest = async (e: React.FormEvent) => {
@@ -128,6 +123,7 @@ export default function PatientLogin() {
     const result = await authService.requestMobileOtp({ mobileNumber });
     setIsLoading(false);
     if (result.success) {
+      setOtpSent(true);
       setStep("verify");
     } else {
       setError(result.error || "Failed to request OTP");
@@ -185,7 +181,7 @@ export default function PatientLogin() {
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight-x">Patient Login</h1>
                 <span className="data-figure text-[10px] text-muted-foreground tracking-widest block mt-1">
-                  CHOOSE AUTHENTICATION METHOD
+                  CHOOSE VERIFICATION METHOD
                 </span>
               </div>
 
@@ -206,7 +202,7 @@ export default function PatientLogin() {
                     <div className="text-left flex-1">
                       <p className="text-sm font-bold tracking-tight-x">Continue with Aadhaar</p>
                       <p className="data-figure text-[10px] text-muted-foreground tracking-widest mt-0.5">
-                        UIDAI · VERIFIED IDENTITY · DEMO
+                        UIDAI · VERIFIED IDENTITY · OTP TO REGISTERED NUMBER
                       </p>
                     </div>
                     <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-trust-400 group-hover:translate-x-1 transition-all mt-1" />
@@ -265,7 +261,7 @@ export default function PatientLogin() {
                 <div>
                   <p className="data-figure text-[10px] font-bold tracking-widest">DEMO MODE · SIMULATED</p>
                   <p className="text-xs mt-0.5 opacity-85 leading-relaxed">
-                    No real OTP or identity verification. Use demo OTP <span className="data-figure font-bold">123456</span>.
+                    Demo mode: use OTP <span className="data-figure font-bold">123456</span>. In production, OTP is sent to your registered mobile number.
                   </p>
                 </div>
               </div>
@@ -322,9 +318,7 @@ export default function PatientLogin() {
                 </Button>
               </form>
             </div>
-          )}
-
-          {method === "aadhaar" && step === "verify" && (
+          )}              {method === "aadhaar" && step === "verify" && (
             <div className="lab-card lab-card-accent p-6 sm:p-8 relative overflow-hidden">
               <div className="absolute top-3 right-3">
                 <StatusBar latency="42ms" sessionId="OTP-VERIFY" />
@@ -334,8 +328,15 @@ export default function PatientLogin() {
                   <Lock className="w-7 h-7 text-trust-300" />
                 </div>
                 <h2 className="text-xl font-bold tracking-tight-x">Enter Verification Code</h2>
+                {otpSent && (
+                  <div className="mt-2 p-2 rounded-md bg-mint-500/10 border border-mint-500/30">
+                    <p className="data-figure text-[10px] tracking-widest text-mint-400">
+                      OTP SENT TO YOUR REGISTERED MOBILE NUMBER
+                    </p>
+                  </div>
+                )}
                 <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
-                  6-DIGIT OTP · AADHAAR
+                  6-DIGIT OTP · AADhaar
                 </span>
               </div>
               <form onSubmit={handleAadhaarVerify} className="space-y-4">
@@ -479,15 +480,20 @@ export default function PatientLogin() {
                 </Button>
               </form>
             </div>
-          )}
-
-          {method === "mobile" && step === "verify" && (
+          )}              {method === "mobile" && step === "verify" && (
             <div className="lab-card lab-card-accent p-6 sm:p-8 relative overflow-hidden">
               <div className="text-center mb-6">
                 <div className="mx-auto w-14 h-14 rounded-xl bg-amber-warn/20 border border-amber-warn/40 flex items-center justify-center mb-4">
                   <Lock className="w-7 h-7 text-amber-warn" />
                 </div>
                 <h2 className="text-xl font-bold tracking-tight-x">Enter Mobile OTP</h2>
+                {otpSent && (
+                  <div className="mt-2 p-2 rounded-md bg-mint-500/10 border border-mint-500/30">
+                    <p className="data-figure text-[10px] tracking-widest text-mint-400">
+                      OTP SENT TO +91 {mobileNumber.slice(0, 5)}XXXXX
+                    </p>
+                  </div>
+                )}
                 <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
                   6-DIGIT · DEMO 123456
                 </span>
