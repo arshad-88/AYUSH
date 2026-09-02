@@ -117,3 +117,25 @@ export const updateDocument = mutation({
     return args.documentId;
   },
 });
+
+export const deleteDocument = mutation({
+  args: { documentId: v.id("documents") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) throw new Error("Not authenticated");
+    const doc = await ctx.db.get(args.documentId);
+    if (!doc) throw new Error("Document not found");
+    const patient = await ctx.db.get(doc.patientId);
+    if (!patient || patient.userId !== user._id) throw new Error("Not authorized");
+    // Also delete associated timeline events
+    const events = await ctx.db
+      .query("timelineEvents")
+      .withIndex("by_document", (q) => q.eq("documentId", args.documentId))
+      .collect();
+    for (const event of events) {
+      await ctx.db.delete(event._id);
+    }
+    await ctx.db.delete(args.documentId);
+    return args.documentId;
+  },
+});
