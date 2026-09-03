@@ -31,6 +31,17 @@ export interface VoiceInteractionConfig {
   onCompleted?: () => void;
 }
 
+// Timeouts in milliseconds
+const ASR_MAX_DURATION_MS = 20_000; // Max time to listen — shorter to feel more responsive
+const ASR_SILENT_TIMEOUT_MS = 6_000; // No speech detected at all — prompt quickly
+const NO_SPEECH_RETRY_LIMIT = 3; // Retry more often — patients may be hesitant
+
+export type VoiceFeedbackKind =
+  | "no_speech"
+  | "processing"
+  | "error"
+  | "retry";
+
 export class VoiceInteractionController {
   private stateMachine: VoiceStateMachine;
   private asrService: AsrService;
@@ -38,8 +49,11 @@ export class VoiceInteractionController {
   private config: VoiceInteractionConfig;
   private currentQuestion: string = "";
   private isCleanedUp: boolean = false;
-  private asrStopTimeout: ReturnType<typeof setTimeout> | null = null;
+  private asrMaxTimeout: ReturnType<typeof setTimeout> | null = null;
+  private asrSilentTimeout: ReturnType<typeof setTimeout> | null = null;
   private lastFinalTranscript: string = "";
+  private noSpeechRetries: number = 0;
+  private hasReceivedAnySpeech: boolean = false;
 
   constructor(
     asrService: AsrService,
@@ -144,8 +158,8 @@ export class VoiceInteractionController {
       this.config.onSpeakingEnd?.();
 
       // After TTS finishes, automatically start listening
-      // Add a small delay to prevent capturing tail end of TTS
-      await this.delay(500);
+      // Brief pause so patient has a natural beat to begin speaking
+      await this.delay(300);
 
       if (!this.isCleanedUp) {
         await this.startListening();
@@ -169,17 +183,25 @@ export class VoiceInteractionController {
 
     this.config.onListeningStart?.();
     this.lastFinalTranscript = "";
+    this.hasReceivedAnySpeech = false;
 
     try {
-      // Set a timeout to force stop listening after reasonable duration
-      // Typically a patient answer should be < 30 seconds
-      const ASR_TIMEOUT = 30000; // 30 seconds
-      this.asrStopTimeout = setTimeout(() => {
+      // Hard max: stop listening after ASR_MAX_DURATION_MS regardless
+      this.asrMaxTimeout = setTimeout(() => {
         if (this.stateMachine.isListening()) {
-          console.warn("ASR timeout, stopping listening");
+          console.warn("[VOICE] ASR hard timeout reached");
           this.asrService.stopListening();
         }
-      }, ASR_TIMEOUT);
+      }, ASR_MAX_DURATION_MS);
+
+      // Silent timeout: if no speech at all within ASR_SILENT_TIMEOUT_MS, prompt retry
+      this.asrSilentTimeout = setTimeout(() => {
+        if (this.stateMachine.isListening() && !this.hasReceivedAnySpeech) {
+          console.warn("[VOICE] No speech detected within silent timeout");
+          this.asrService.stopListening();
+          this.handleNoSpeechDetected();
+        }
+      }, ASR_SILENT_TIMEOUT_MS);
 
       // Start ASR
       this.asrService.startListening(
@@ -199,23 +221,21 @@ export class VoiceInteractionController {
   private handleAsrResult(result: TranscriptionResult): void {
     if (this.isCleanedUp) return;
 
+    // Track whether any speech was received
+    if (result.text.trim()) {
+      this.hasReceivedAnySpeech = true;
+    }
+
     // Emit transcript for UI display
     this.config.onTranscript?.(result.text, result.isFinal);
 
     if (result.isFinal) {
-      // Clear the timeout
-      if (this.asrStopTimeout) {
-        clearTimeout(this.asrStopTimeout);
-        this.asrStopTimeout = null;
-      }
+      // Clear all timeouts
+      this.clearAsrTimeouts();
 
       // Don't process empty transcripts
       if (!result.text.trim()) {
-        this.config.onError?.("I didn't catch that. Please try again.");
-        // Return to listening
-        if (!this.isCleanedUp) {
-          this.resumeListening();
-        }
+        this.handleNoSpeechDetected();
         return;
       }
 
@@ -225,16 +245,59 @@ export class VoiceInteractionController {
   }
 
   /**
+   * Private: Handle no-speech-detected scenario with retry logic.
+   */
+  private handleNoSpeechDetected(): void {
+    this.noSpeechRetries++;
+
+    const doctorLikePrompts = [
+      "I'm here and ready to listen. Please take your time — whenever you're ready, just tell me what's been bothering you.",
+      "No rush at all. I'm right here. Just speak when you feel comfortable — I'm listening carefully.",
+      "That's completely fine. Some people need a moment. Whenever you're ready, I'm here to help you.",
+    ];
+
+    if (this.noSpeechRetries >= NO_SPEECH_RETRY_LIMIT) {
+      this.config.onError?.(
+        "I notice you haven't spoken yet — that's perfectly fine. You can try speaking again when you're ready, or switch to typing if that's easier for you. I want you to be comfortable."
+      );
+      this.noSpeechRetries = 0;
+      if (this.stateMachine.isListening()) {
+        this.stateMachine.transitionTo("QUESTION_READY");
+      }
+      return;
+    }
+
+    this.config.onError?.(
+      doctorLikePrompts[Math.min(this.noSpeechRetries - 1, doctorLikePrompts.length - 1)]
+    );
+    // Resume listening for another attempt
+    if (!this.isCleanedUp && this.stateMachine.isListening()) {
+      this.resumeListening();
+    }
+  }
+
+  /**
+   * Private: Clear all ASR timeout handles.
+   */
+  private clearAsrTimeouts(): void {
+    if (this.asrMaxTimeout) {
+      clearTimeout(this.asrMaxTimeout);
+      this.asrMaxTimeout = null;
+    }
+    if (this.asrSilentTimeout) {
+      clearTimeout(this.asrSilentTimeout);
+      this.asrSilentTimeout = null;
+    }
+  }
+
+  /**
    * Private: Stop listening and transition to processing.
    */
   private stopListening(): void {
     if (this.isCleanedUp) return;
 
-    // Clear the timeout
-    if (this.asrStopTimeout) {
-      clearTimeout(this.asrStopTimeout);
-      this.asrStopTimeout = null;
-    }
+    this.clearAsrTimeouts();
+    this.noSpeechRetries = 0;
 
     this.asrService.stopListening();
     this.config.onListeningEnd?.();
@@ -300,11 +363,8 @@ export class VoiceInteractionController {
 
     this.ttsService.stop();
     this.asrService.stopListening();
-
-    if (this.asrStopTimeout) {
-      clearTimeout(this.asrStopTimeout);
-      this.asrStopTimeout = null;
-    }
+    this.clearAsrTimeouts();
+    this.noSpeechRetries = 0;
 
     this.stateMachine.transitionTo("IDLE");
   }
@@ -318,11 +378,8 @@ export class VoiceInteractionController {
     this.isCleanedUp = true;
     this.ttsService.stop();
     this.asrService.stopListening();
-
-    if (this.asrStopTimeout) {
-      clearTimeout(this.asrStopTimeout);
-      this.asrStopTimeout = null;
-    }
+    this.clearAsrTimeouts();
+    this.noSpeechRetries = 0;
 
     this.stateMachine.reset();
   }

@@ -316,30 +316,30 @@ export function localizePlanQuestion(
 export function interviewGreeting(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
   if (lang === "Hindi") {
-    return "नमस्ते! मैं आपका परामर्श-पूर्व सहायक हूँ। डॉक्टर के लिए जानकारी इकट्ठा करूँगा। आज आप क्यों आए हैं? अपनी मुख्य समस्या बताइए।";
+    return "नमस्ते! मैं आपकी सेवा में हूँ। आज आपको जो भी तकलीफ है, मैं उसे ध्यान से सुनूँगा ताकि डॉक्टर को सारी जानकारी मिल सके। तो बताइए, आज आप यहाँ किस वजह से आए हैं? अपनी मुख्य समस्या अपने शब्दों में बताइए।";
   }
   if (lang === "Telugu") {
-    return "నమస్తే! నేను మీ ప్రీ-కన్సల్టేషన్ సహాయకుడిని. వైద్యుడి కోసం సమాచారం సేకరిస్తాను. ఈరోజు మీరు ఎందుకు వచ్చారు? మీ ప్రధాన సమస్య చెప్పండి.";
+    return "నమస్తే! మీకు సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను. మీకు ఉన్న ఎలాంటి సమస్యనైనా నేను శ్రద్ధగా వింటాను, తద్వారా డాక్టర్‌కు పూర్తి సమాచారం అందుతుంది. ఈరోజు మీరు ఇక్కడికి ఎందుకు వచ్చారు? మీ ప్రధాన సమస్యను మీ మాటల్లో చెప్పండి.";
   }
-  return "Namaste! I'm your pre-consultation assistant. I'll help prepare a case sheet for your doctor. What brings you here today?";
+  return "Hello! I'm here to help you before you see your doctor. I'll listen carefully to everything you share so your doctor gets the complete picture. So, what brings you in today? Please describe your main concern in your own words.";
 }
 
 export function interviewCompleteMessage(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
   if (lang === "Hindi") {
-    return "धन्यवाद। डॉक्टर के लिए ज़रूरी जानकारी मिल गई है। अब AYUSH आकलन की ओर चलते हैं।";
+    return "बहुत अच्छा, आपने बहुत अच्छे से सारी जानकारी दी। मुझे लगता है कि डॉक्टर के लिए ज़रूरी जानकारी पूरी हो गई है। अब आगे AYUSH आकलन है — यह भी उतना ही महत्वपूर्ण है।";
   }
   if (lang === "Telugu") {
-    return "ధన్యవాదాలు. వైద్యుడికి కావాల్సిన సమాచారం సేకరించాం. ఇప్పుడు AYUSH అంచనాకు వెళదాం.";
+    return "చాలా బాగుంది, మీరు చాలా బాగా సమాచారం అందించారు. డాక్టర్‌కు అవసరమైన సమాచారం పూర్తయిందని నాకు అనిపిస్తోంది. ఇప్పుడు AYUSH అంచనా కొనసాగిద్దాం — ఇది కూడా అంతే ముఖ్యం.";
   }
-  return "Thank you. I have gathered the information needed for your doctor. Please proceed to the AYUSH assessment.";
+  return "Wonderful, you've given me excellent information. I believe I now have everything your doctor needs to prepare well. Let's move on to the AYUSH assessment — this helps us understand your overall constitutional health.";
 }
 
 export function chiefComplaintPrompt(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
-  if (lang === "Hindi") return "आज आपकी मुख्य समस्या क्या है?";
-  if (lang === "Telugu") return "ఈరోజు మీ ప్రధాన సమస్య ఏమిటి?";
-  return "What brings you here today? Please describe your main concern.";
+  if (lang === "Hindi") return "बताइए, आज आपको क्या तकलीफ है? अपने शब्दों में बताइए, मैं ध्यान से सुन रहा हूँ।";
+  if (lang === "Telugu") return "చెప్పండి, ఈరోజు మీకు ఎలాంటి సమస్య ఉంది? మీ మాటల్లో వివరించండి, నేను శ్రద్ధగా వింటున్నాను.";
+  return "I understand. Please tell me what's been troubling you today — in your own words, and I'll listen carefully.";
 }
 
 export const fieldLabels: Record<string, { English: string; Hindi: string; Telugu: string }> = {
@@ -402,28 +402,28 @@ export function placeholderText(phase: "complaint" | "interview", language: stri
 
 export function unknownRecordedMessage(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
-  if (lang === "Hindi") return "ठीक है, इसे 'अज्ञात' मान लिया गया है।";
-  if (lang === "Telugu") return "సరే, దీన్ని తెలియదు అని నమోదు చేశాం.";
-  return "Understood — I've marked that as unknown.";
+  if (lang === "Hindi") return "कोई बात नहीं, हर किसी को सब कुछ याद नहीं रहता। डॉक्टर इसे अपनी जाँच में देख लेंगे।";
+  if (lang === "Telugu") return "పర్వాలేదు, ప్రతి ఒక్కరికీ ప్రతి విషయం గుర్తుండదు. డాక్టర్ దీన్ని తన పరిశీలనలో చూసుకుంటారు.";
+  return "That's perfectly fine — not everything needs to be known right now. Your doctor will follow up on this during the consultation.";
 }
 
 export function clarificationMessage(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
-  if (lang === "Hindi") return "कृपया इस सवाल के लिए थोड़ा और स्पष्ट उत्तर दें।";
-  if (lang === "Telugu") return "ఈ ప్రశ్నకు కొంచెం స్పష్టమైన సమాధానం ఇవ్వండి.";
-  return "Could you clarify that answer for this part of the history?";
+  if (lang === "Hindi") return "मैं समझता हूँ, लेकिन क्या आप इसे थोड़ा और विस्तार से बता सकते हैं? इससे डॉक्टर को बेहतर समझ मिलेगी।";
+  if (lang === "Telugu") return "నాకు అర్థమైంది, కానీ దీన్ని కొంచెం వివరంగా చెప్పగలరా? డాక్టర్‌కు మెరుగైన అవగాహన ఉంటుంది.";
+  return "I understand, but could you elaborate a bit more on this? It will help your doctor get a clearer picture.";
 }
 
 export function greetingRetryMessage(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
-  if (lang === "Hindi") return "मुझे आपकी वास्तविक स्वास्थ्य समस्या जाननी है। आज आपको यहाँ किस वजह से आना पड़ा?";
-  if (lang === "Telugu") return "మీ అసలు ఆరోగ్య సమస్య ఏమిటో చెప్పండి. ఈరోజు మీరు ఇక్కడికి ఎందుకు వచ్చారు?";
-  return "I still need the actual health concern. What brings you here today?";
+  if (lang === "Hindi") return "आपकी बात मैं समझ गया, लेकिन मुझे आपकी मुख्य स्वास्थ्य समस्या जाननी है — वह तकलीफ जिसकी वजह से आज आपको यहाँ आना पड़ा।";
+  if (lang === "Telugu") return "మీ మాట నాకు అర్థమైంది, కానీ మీ ప్రధాన ఆరోగ్య సమస్య ఏమిటో నాకు తెలియాలి — ఈరోజు మిమ్మల్ని ఇక్కడికి తీసుకొచ్చిన ఆ సమస్య.";
+  return "I appreciate you sharing, but I need to understand the actual health issue — what's the main symptom or discomfort that brought you here today?";
 }
 
 export function severityClarificationMessage(language: string | undefined): string {
   const lang = normalizeInterviewLanguage(language);
-  if (lang === "Hindi") return "कृपया स्पष्ट करें: क्या दर्द नहीं है, या तीव्रता का अंक अलग है?";
-  if (lang === "Telugu") return "దయచేసి స్పష్టం చేయండి: నొప్పి లేదా అసౌకర్యం లేదా, తీవ్రత స్కోరు వేరేనా?";
-  return "Please clarify: are you pain-free, or is the severity score different?";
+  if (lang === "Hindi") return "मैं समझता हूँ — क्या आपको अभी दर्द नहीं है, या तीव्रता का स्कोर कुछ और है? कृपया स्पष्ट करें।";
+  if (lang === "Telugu") return "నాకు అర్థమైంది — మీకు ఇప్పుడు నొప్పి లేదా, లేదా తీవ్రత స్కోరు వేరేగా ఉందా? దయచేసి స్పష్టం చేయండి.";
+  return "I understand — are you currently pain-free, or is the severity level different from what you said? Please clarify so I can record it correctly.";
 }

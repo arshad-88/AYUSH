@@ -344,10 +344,10 @@ export default function VoiceModeInterface() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold tracking-tight-x">
-                      Voice Interview
+                      Consultation
                     </h3>
                     <span className="data-figure text-[10px] text-muted-foreground tracking-widest">
-                      HANDS-FREE · ASR + TTS
+                      TALKING WITH YOUR AYUSH-AI ASSISTANT
                     </span>
                   </div>
                 </div>

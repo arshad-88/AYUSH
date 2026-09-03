@@ -32,80 +32,90 @@ export function VoiceOrb({
     switch (state) {
       case "IDLE":
         return {
-          bgColor: "bg-slate-200",
-          borderColor: "border-slate-300",
-          innerColor: "bg-slate-300",
-          textColor: "text-slate-600",
+          bgColor: "bg-trust-500/10",
+          borderColor: "border-trust-500/30",
+          innerColor: "bg-trust-500/30",
+          textColor: "text-trust-300",
           icon: Mic,
           pulsing: false,
-          label: "Ready",
+          label: "Ready to begin",
         };
       case "QUESTION_READY":
         return {
-          bgColor: "bg-blue-100",
-          borderColor: "border-blue-300",
-          innerColor: "bg-blue-400",
-          textColor: "text-blue-700",
+          bgColor: "bg-trust-500/15",
+          borderColor: "border-trust-400/50",
+          innerColor: "bg-trust-500",
+          textColor: "text-trust-300",
           icon: Mic,
           pulsing: true,
-          label: "Ready to listen",
+          label: "I'm listening carefully",
         };
       case "SPEAKING":
         return {
-          bgColor: "bg-amber-100",
-          borderColor: "border-amber-400",
-          innerColor: "bg-amber-500",
-          textColor: "text-amber-700",
+          bgColor: "bg-teal-500/15",
+          borderColor: "border-teal-400/50",
+          innerColor: "bg-teal-500",
+          textColor: "text-teal-400",
           icon: Volume2,
           pulsing: true,
-          label: "Speaking",
+          label: "Speaking with you",
         };
       case "LISTENING":
         return {
-          bgColor: "bg-green-100",
-          borderColor: "border-green-400",
-          innerColor: "bg-green-500",
-          textColor: "text-green-700",
+          bgColor: "bg-mint-500/15",
+          borderColor: "border-mint-400/50",
+          innerColor: "bg-mint-500",
+          textColor: "text-mint-400",
           icon: Mic,
           pulsing: true,
-          label: "Listening",
+          label: "Go ahead, I'm listening",
         };
       case "PROCESSING":
         return {
-          bgColor: "bg-purple-100",
-          borderColor: "border-purple-400",
-          innerColor: "bg-purple-500",
-          textColor: "text-purple-700",
+          bgColor: "bg-violet-500/15",
+          borderColor: "border-violet-400/50",
+          innerColor: "bg-violet-500",
+          textColor: "text-violet-300",
           icon: Loader2,
           pulsing: false,
-          label: "Processing",
+          label: "Let me think about that...",
         };
       case "ERROR":
         return {
-          bgColor: "bg-red-100",
-          borderColor: "border-red-400",
-          innerColor: "bg-red-500",
-          textColor: "text-red-700",
+          bgColor: "bg-red-critical/15",
+          borderColor: "border-red-critical/50",
+          innerColor: "bg-red-critical",
+          textColor: "text-red-critical",
           icon: AlertCircle,
           pulsing: false,
-          label: "Error",
+          label: "Something went wrong",
         };
       case "COMPLETED":
         return {
-          bgColor: "bg-emerald-100",
-          borderColor: "border-emerald-400",
-          innerColor: "bg-emerald-500",
-          textColor: "text-emerald-700",
+          bgColor: "bg-mint-500/15",
+          borderColor: "border-mint-400/50",
+          innerColor: "bg-mint-500",
+          textColor: "text-mint-400",
           icon: CheckCircle2,
           pulsing: false,
-          label: "Complete",
+          label: "All done — thank you",
+        };
+      case "NO_SPEECH":
+        return {
+          bgColor: "bg-amber-warn/15",
+          borderColor: "border-amber-warn/50",
+          innerColor: "bg-amber-warn",
+          textColor: "text-amber-warn",
+          icon: AlertCircle,
+          pulsing: true,
+          label: "I didn't catch that",
         };
       default:
         return {
-          bgColor: "bg-slate-200",
-          borderColor: "border-slate-300",
-          innerColor: "bg-slate-300",
-          textColor: "text-slate-600",
+          bgColor: "bg-trust-500/10",
+          borderColor: "border-trust-500/30",
+          innerColor: "bg-trust-500/30",
+          textColor: "text-trust-300",
           icon: Mic,
           pulsing: false,
           label: "Ready",
@@ -208,15 +218,16 @@ export function VoiceOrb({
         )}
       </AnimatePresence>
 
-      {/* Instructions */}
+      {/* Doctor-like status messages */}
       <div className="text-center text-sm text-muted-foreground mt-4">
-        {state === "IDLE" && <p>Waiting to start...</p>}
-        {state === "QUESTION_READY" && <p>Ready to listen to the question</p>}
-        {state === "SPEAKING" && <p>AI is speaking the question...</p>}
-        {state === "LISTENING" && <p>Speak your answer now</p>}
-        {state === "PROCESSING" && <p>Processing your response...</p>}
-        {state === "ERROR" && <p>An error occurred. Please try again.</p>}
-        {state === "COMPLETED" && <p>Interview complete</p>}
+        {state === "IDLE" && <p className="italic">"Hello, I'm here to help you before you see your doctor."</p>}
+        {state === "QUESTION_READY" && <p className="italic">"I understand. Please go on..."</p>}
+        {state === "SPEAKING" && <p className="italic">"Let me ask you something..."</p>}
+        {state === "LISTENING" && <p className="italic">"I'm listening carefully to what you're saying."</p>}
+        {state === "NO_SPEECH" && <p className="italic">"I didn't quite catch that — please take your time."</p>}
+        {state === "PROCESSING" && <p className="italic">"Thank you, let me note that down..."</p>}
+        {state === "ERROR" && <p>Something went wrong. Please try again.</p>}
+        {state === "COMPLETED" && <p className="italic">"I have everything your doctor needs. Thank you for being so thorough."</p>}
       </div>
     </div>
   );

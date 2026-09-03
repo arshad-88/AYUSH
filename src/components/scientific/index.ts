@@ -9,6 +9,8 @@ export { ParticleField } from "./ParticleField";
 export { HeroCanvas } from "./HeroCanvas";
 export { AnatomicalHeart } from "./AnatomicalHeart";
 export { AnatomicalHeartDetail } from "./AnatomicalHeartDetail";
+export { InteractiveHeart } from "./InteractiveHeart";
+export { HumanPainModel } from "./HumanPainModel";
 export { StepTrack } from "./StepTrack";
 export { RingProgress } from "./RingProgress";
 export { StatusBar } from "./StatusBar";
